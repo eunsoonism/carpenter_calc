@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>목조주택 골조 통합 계산기</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 440px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 1.25rem;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+        .tab-menu {
+            display: flex;
+            background: #e0e6ed;
+            border-radius: 8px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 10px 0;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #555;
+            cursor: pointer;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .tab-btn.active {
+            background: #fff;
+            color: #1abc9c;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .calc-desc {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 9px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+        .input-with-unit {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .input-with-unit input {
+            padding-right: 35px;
+        }
+        .unit-text {
+            position: absolute;
+            right: 12px;
+            color: #888;
+            font-size: 0.85rem;
+            pointer-events: none;
+        }
+        .dual-inputs {
+            display: flex;
+            gap: 10px;
+        }
+        .dual-inputs .input-box {
+            flex: 1;
+        }
+        .triple-inputs {
+            display: flex;
+            gap: 7px;
+        }
+        .triple-inputs .input-box {
+            flex: 1;
+        }
+        .calc-layout {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+        .calc-layout .input-box {
+            flex: 1;
+        }
+        .calc-layout label {
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+        .calc-layout input {
+            padding: 9px 6px;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+        .calc-btn-box {
+            display: flex;
+            gap: 4px;
+            flex: 0 0 auto;
+        }
+        .action-btn {
+            background-color: #1abc9c;
+            color: white;
+            border: none;
+            padding: 9px 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            height: 41px;
+            white-space: nowrap;
+        }
+        .action-btn:active {
+            background-color: #16a085;
+        }
+        .reset-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 9px 12px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            height: 41px;
+            white-space: nowrap;
+        }
+        .custom-input-box {
+            margin-top: 5px;
+            display: none;
+        }
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f8f5;
+            border-left: 5px solid #1abc9c;
+            border-radius: 4px;
+        }
+        .result-box h3 {
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            color: #16a085;
+        }
+        .result-item {
+            font-size: 0.95rem;
+            margin-bottom: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>목조주택 골조 통합 계산기</h2>
+    <div class="subtitle">(기준 : 외벽 중심)</div>
+
+    <div class="tab-menu">
+        <button type="button" class="tab-btn active" onclick="switchTab(event, 'tab-rafter')">서까래</button>
+        <button type="button" class="tab-btn" onclick="switchTab(event, 'tab-hipjack')">힙·잭서까래</button>
+        <button type="button" class="tab-btn" onclick="switchTab(event, 'tab-reverse')">목조계산기</button>
+    </div>
+
+
+    <!-- ===================================================================== -->
+    <!-- [1] 서까래 탭 UI 영역 (시작)                                          -->
+    <!-- ===================================================================== -->
+    <div id="tab-rafter" class="tab-content active">
+        <div class="input-group">
+            <div class="dual-inputs">
+                <div class="input-box" style="flex: 1.2;">
+                    <label for="halfSpanInput1">Half Span (외벽 중심)</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="halfSpanInput1" value="4000">
+                        <span class="unit-text">mm</span>
+                    </div>
+                </div>
+                <div class="input-box" style="flex: 0.8;">
+                    <label for="overhang1">처마 길이</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="overhang1" value="500">
+                        <span class="unit-text">mm</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <div class="triple-inputs">
+                <div class="input-box">
+                    <label for="wallType1">외벽 스터드</label>
+                    <select id="wallType1">
+                        <option value="89">2x4 (89)</option>
+                        <option value="140" selected>2x6 (140)</option>
+                        <option value="184">2x8 (184)</option>
+                        <option value="0">직접 입력</option>
+                    </select>
+                </div>
+                <div class="input-box">
+                    <label for="rafterSize1">서까래 규격</label>
+                    <select id="rafterSize1">
+                        <option value="140">2x6 (140)</option>
+                        <option value="184">2x8 (184)</option>
+                        <option value="235" selected>2x10 (235)</option>
+                        <option value="286">2x12 (286)</option>
+                    </select>
+                </div>
+                <div class="input-box">
+                    <label for="ridgeSize1">용마루 높이</label>
+                    <select id="ridgeSize1">
+                        <option value="184">2x8 (184)</option>
+                        <option value="235" selected>2x10 (235)</option>
+                        <option value="286">2x12 (286)</option>
+                        <option value="custom">직접 입력</option>
+                    </select>
+                    <input type="number" id="customRidgeInput1" class="custom-input-box" placeholder="높이(mm)">
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <div class="dual-inputs">
+                <div class="input-box">
+                    <label for="wallSheathing1">외벽 합판 두께</label>
+                    <select id="wallSheathing1">
+                        <option value="9.5">9.5</option>
+                        <option value="11.1" selected>11.1 (기본)</option>
+                        <option value="12">12.0</option>
+                        <option value="custom">직접 입력</option>
+                    </select>
+                    <input type="number" step="0.5" id="customSheathingInput1" class="custom-input-box" placeholder="두께">
+                </div>
+                <div class="input-box">
+                    <label for="subFascia1">서브페이샤</label>
+                    <input type="number" id="subFascia1" value="38">
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <div class="dual-inputs">
+                <div class="input-box">
+                    <label for="roofAngle1">경사 각도 (°)</label>
+                    <input type="number" step="0.001" id="roofAngle1" value="" placeholder="예: 31.0">
+                </div>
+                <div class="input-box">
+                    <label for="pitchRise1">물매 (10 : X)</label>
+                    <input type="number" step="0.1" id="pitchRise1" value="6" placeholder="예: 6">
+                </div>
+            </div>
+        </div>
+
+        <div class="result-box" id="result">
+            <h3>산출결과</h3>
+            <div class="result-item" id="res-main"><b>본 서까래 길이: - mm</b></div>
+            <div class="result-item" id="res-overhang"><b>처마 서까래 길이: - mm</b></div>
+            <div class="result-item" id="res-cuts"><b>HAP : -</b> / 시트컷(Seat) : - / 플럼컷(Plumb) : -</div>
+            <div class="result-item" id="res-temp-post"><b>임시기둥 높이 : - mm</b></div>
+            <div class="result-item" id="res-total" style="font-weight: bold; border-top: 1px solid #b2dfdb; padding-top: 6px; margin-top: 6px;">
+                서까래 총 길이: - mm
+            </div>
+        </div>
+    </div>
+    <!-- [1] 서까래 탭 UI 영역 (끝) -->
+    <!-- ===================================================================== -->
+
+
+    <!-- ===================================================================== -->
+    <!-- [2] 힙·잭서까래 탭 UI 영역 (시작)                                     -->
+    <!-- ===================================================================== -->
+    <div id="tab-hipjack" class="tab-content">
+        <div class="input-group">
+            <div class="dual-inputs">
+                <div class="input-box" style="flex: 1.2;">
+                    <label for="halfSpanInput2">Half Span (외벽 중심)</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="halfSpanInput2" value="4000">
+                        <span class="unit-text">mm</span>
+                    </div>
+                </div>
+                <div class="input-box" style="flex: 0.8;">
+                    <label for="overhang2">처마 길이</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="overhang2" value="500">
+                        <span class="unit-text">mm</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <div class="triple-inputs">
+                <div class="input-box">
+                    <label for="wallType2">외벽 스터드</label>
+                    <select id="wallType2">
+                        <option value="89">2x4 (89)</option>
+                        <option value="140" selected>2x6 (140)</option>
+                        <option value="184">2x8 (184)</option>
+                        <option value="0">직접 입력</option>
+                    </select>
+                </div>
+                <div class="input-box">
+                    <label for="wallSheathing2">외벽 합판 두께</label>
+                    <select id="wallSheathing2">
+                        <option value="9.5">9.5</option>
+                        <option value="11.1" selected>11.1 (기본)</option>
+                        <option value="12">12.0</option>
+                        <option value="custom">직접 입력</option>
+                    </select>
+                    <input type="number" step="0.5" id="customSheathingInput2" class="custom-input-box" placeholder="두께">
+                </div>
+                <div class="input-box">
+                    <label for="subFascia2">서브페이샤</label>
+                    <input type="number" id="subFascia2" value="38">
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <div class="dual-inputs">
+                <div class="input-box">
+                    <label for="roofAngle2">경사 각도 (°)</label>
+                    <input type="number" step="0.001" id="roofAngle2" value="" placeholder="예: 31.0">
+                </div>
+                <div class="input-box">
+                    <label for="pitchRise2">물매 (10 : X)</label>
+                    <input type="number" step="0.1" id="pitchRise2" value="6" placeholder="예: 6">
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <div class="dual-inputs">
+                <div class="input-box">
+                    <label for="rafterSpacing">서까래 간격</label>
+                    <select id="rafterSpacing">
+                        <option value="406" selected>16인치 (406 mm)</option>
+                        <option value="610">24인치 (610 mm)</option>
+                        <option value="custom">직접 입력</option>
+                    </select>
+                    <input type="number" id="customSpacingInput" class="custom-input-box" placeholder="간격(mm)">
+                </div>
+                <div class="input-box">
+                    <label for="jackCount">잭 서까래 수</label>
+                    <input type="number" id="jackCount" value="4" min="1" max="10">
+                </div>
+            </div>
+        </div>
+
+        <div class="result-box" id="jackResultBox" style="background-color: #fef9e7; border-left-color: #f39c12; margin-top: 15px;">
+            <h3 style="color: #d68910;">힙 & 잭 서까래 산출 결과</h3>
+            <div class="result-item" id="res-hip"><b>힙 서까래 총 길이: - mm</b></div>
+            <div class="result-item" id="res-diff"><b>잭 서까래 길이 감소치 (Common Diff): - mm</b></div>
+            <div class="result-item" id="res-jack-list" style="margin-top: 8px; font-size: 0.9rem; line-height: 1.5;">
+                <b>[가장 긴 잭 서까래 및 순차적 길이]</b><br>-
+            </div>
+        </div>
+    </div>
+    <!-- [2] 힙·잭서까래 탭 UI 영역 (끝) -->
+    <!-- ===================================================================== -->
+
+
+    <!-- ===================================================================== -->
+    <!-- [3] 목조계산기 탭 UI 영역 (시작)                                      -->
+    <!-- ===================================================================== -->
+    <div id="tab-reverse" class="tab-content">
+        <div class="calc-desc">
+            💡 <b>목조계산기 사용법</b><br>
+            Run, Rise, 각도 중 2개만 넣고 [=] 버튼을 누르세요.
+        </div>
+        <div class="input-group">
+            <div class="calc-layout">
+                <div class="input-box">
+                    <label for="calcRun">Run</label>
+                    <input type="number" step="any" id="calcRun" placeholder="밑변">
+                </div>
+                <div class="input-box">
+                    <label for="calcRise">Rise</label>
+                    <input type="number" step="any" id="calcRise" placeholder="높이">
+                </div>
+                <div class="input-box">
+                    <label for="calcAngle">각도 (°)</label>
+                    <input type="number" step="any" id="calcAngle" placeholder="각도">
+                </div>
+                <div class="calc-btn-box">
+                    <button type="button" class="action-btn" onclick="runReverseCalc()">=</button>
+                    <button type="button" class="reset-btn" onclick="resetCalc()">초기화</button>
+                </div>
+            </div>
+        </div>
+        <div class="result-box" id="reverseResultBox" style="display: none; background-color: #fef9e7; border-left-color: #f39c12; margin-top: 15px;">
+            <h3 style="color: #d68910; margin-bottom: 8px;">계산 결과</h3>
+            <div class="result-item" id="res-reverse-output"></div>
+        </div>
+
+        <!-- 박공 스터드 계산 영역 추가 -->
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 25px 0 20px 0;">
+        
+        <div class="calc-desc">
+            📐 <b>박공 스터드 (Gable Stud) 계산</b><br>
+            밑변(Run), 경사각, 스터드 간격을 입력하면 스터드 높이가 큰 순서대로 실시간 산출됩니다.
+        </div>
+
+        <div class="input-group">
+            <div class="triple-inputs">
+                <div class="input-box">
+                    <label for="gableRun">밑변 (Run)</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="gableRun" value="3600">
+                        <span class="unit-text">mm</span>
+                    </div>
+                </div>
+                <div class="input-box">
+                    <label for="gableAngle">경사각 (°)</label>
+                    <input type="number" step="any" id="gableAngle" value="31.0" placeholder="예: 31.0">
+                </div>
+                <div class="input-box">
+                    <label for="gableSpacing">스터드 간격</label>
+                    <select id="gableSpacing">
+                        <option value="406" selected>16인치 (406)</option>
+                        <option value="610">24인치 (610)</option>
+                        <option value="custom">직접 입력</option>
+                    </select>
+                    <input type="number" id="customGableSpacing" class="custom-input-box" placeholder="간격(mm)">
+                </div>
+            </div>
+        </div>
+
+        <div class="result-box" id="gableResultBox" style="background-color: #fef9e7; border-left-color: #f39c12; margin-top: 15px;">
+            <h3 style="color: #d68910; margin-bottom: 8px;">박공 스터드 산출 결과</h3>
+            <div class="result-item" id="res-gable-diff" style="display: none;"></div>
+            <div class="result-item" id="res-gable-list" style="margin-top: 2px; font-size: 0.9rem; line-height: 1.5;">
+                -
+            </div>
+        </div>
+    </div>
+    <!-- [3] 목조계산기 탭 UI 영역 (끝) -->
+    <!-- ===================================================================== -->
+
+</div>
+
+<script>
+function switchTab(evt, tabId) {
+    const contents = document.getElementsByClassName('tab-content');
+    for (let c of contents) c.classList.remove('active');
+    const buttons = document.getElementsByClassName('tab-btn');
+    for (let b of buttons) b.classList.remove('active');
+    document.getElementById(tabId).classList.add('active');
+    evt.currentTarget.classList.add('active');
+}
+
+// 실시간 연동을 위한 이벤트 리스너 세팅
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. 서까래 탭 입력요소 감지
+    const rafterInputs = document.querySelectorAll('#tab-rafter input, #tab-rafter select');
+    rafterInputs.forEach(el => {
+        el.addEventListener('input', () => {
+            toggleCustomSheathing1();
+            toggleCustomRidge1();
+            calculateRafter();
+        });
+        el.addEventListener('change', () => {
+            toggleCustomSheathing1();
+            toggleCustomRidge1();
+            calculateRafter();
+        });
+    });
+
+    // 2. 힙·잭서까래 탭 입력요소 감지
+    const hipJackInputs = document.querySelectorAll('#tab-hipjack input, #tab-hipjack select');
+    hipJackInputs.forEach(el => {
+        el.addEventListener('input', () => {
+            toggleCustomSheathing2();
+            toggleCustomSpacing();
+            calculateHipJack();
+        });
+        el.addEventListener('change', () => {
+            toggleCustomSheathing2();
+            toggleCustomSpacing();
+            calculateHipJack();
+        });
+    });
+
+    // 3. 목조계산기 탭 및 박공 스터드 입력요소 감지
+    const gableInputs = document.querySelectorAll('#tab-reverse input, #tab-reverse select');
+    gableInputs.forEach(el => {
+        if (el.id !== 'calcRun' && el.id !== 'calcRise' && el.id !== 'calcAngle') {
+            el.addEventListener('input', () => {
+                toggleGableSpacing();
+                runGableCalc();
+            });
+            el.addEventListener('change', () => {
+                toggleGableSpacing();
+                runGableCalc();
+            });
+        }
+    });
+
+    // 초기 실행
+    calculateRafter();
+    calculateHipJack();
+    toggleGableSpacing();
+    runGableCalc();
+});
+
+function toggleCustomSheathing1() {
+    const v = document.getElementById('wallSheathing1').value;
+    document.getElementById('customSheathingInput1').style.display = (v === 'custom') ? 'block' : 'none';
+}
+function toggleCustomRidge1() {
+    const v = document.getElementById('ridgeSize1').value;
+    document.getElementById('customRidgeInput1').style.display = (v === 'custom') ? 'block' : 'none';
+}
+
+function toggleCustomSheathing2() {
+    const v = document.getElementById('wallSheathing2').value;
+    document.getElementById('customSheathingInput2').style.display = (v === 'custom') ? 'block' : 'none';
+}
+function toggleCustomSpacing() {
+    const v = document.getElementById('rafterSpacing').value;
+    document.getElementById('customSpacingInput').style.display = (v === 'custom') ? 'block' : 'none';
+}
+
+function toggleGableSpacing() {
+    const v = document.getElementById('gableSpacing').value;
+    document.getElementById('customGableSpacing').style.display = (v === 'custom') ? 'block' : 'none';
+}
+
+
+// =========================================================================
+// [A] 서까래 계산 로직 함수 (시작)
+// =========================================================================
+function calculateRafter() {
+    const halfSpanMm = parseFloat(document.getElementById('halfSpanInput1').value) || 0;
+    const rafterDepth = parseFloat(document.getElementById('rafterSize1').value) || 235;
+    
+    const ridgeSelect = document.getElementById('ridgeSize1').value;
+    let ridgeDepth = (ridgeSelect === 'custom') ? (parseFloat(document.getElementById('customRidgeInput1').value) || 0) : (parseFloat(ridgeSelect) || 235);
+
+    const wallThickness = parseFloat(document.getElementById('wallType1').value) || 0;
+    
+    const sheathingSelect = document.getElementById('wallSheathing1').value;
+    let wallSheathingMm = (sheathingSelect === 'custom') ? (parseFloat(document.getElementById('customSheathingInput1').value) || 0) : (parseFloat(sheathingSelect) || 0);
+
+    const overhangMm = parseFloat(document.getElementById('overhang1').value) || 0;
+    const subFasciaMm = parseFloat(document.getElementById('subFascia1').value) || 0;
+    
+    const angleInputVal = document.getElementById('roofAngle1').value;
+    const pitchInputVal = document.getElementById('pitchRise1').value;
+
+    let multiplier = 0, riseRatio = 0;
+    
+    if (document.activeElement.id === 'roofAngle1' && angleInputVal !== '') {
+        document.getElementById('pitchRise1').value = '';
+        const rad = parseFloat(angleInputVal) * (Math.PI / 180);
+        multiplier = 1 / Math.cos(rad);
+        riseRatio = Math.tan(rad);
+    } else if (document.activeElement.id === 'pitchRise1' && pitchInputVal !== '') {
+        document.getElementById('roofAngle1').value = '';
+        const pRise = parseFloat(pitchInputVal);
+        multiplier = Math.sqrt(Math.pow(10, 2) + Math.pow(pRise, 2)) / 10;
+        riseRatio = pRise / 10;
+    } else {
+        if (pitchInputVal !== '') {
+            const pRise = parseFloat(pitchInputVal);
+            multiplier = Math.sqrt(Math.pow(10, 2) + Math.pow(pRise, 2)) / 10;
+            riseRatio = pRise / 10;
+        } else if (angleInputVal !== '') {
+            const rad = parseFloat(angleInputVal) * (Math.PI / 180);
+            multiplier = 1 / Math.cos(rad);
+            riseRatio = Math.tan(rad);
+        } else {
+            return;
+        }
+    }
+
+    const ridgeThicknessHalf = 19;
+    const actualRun = halfSpanMm + (wallThickness / 2) + wallSheathingMm - ridgeThicknessHalf;
+    const actualRise = actualRun * riseRatio;
+
+    const overhangRun = overhangMm - subFasciaMm - (wallThickness / 2) - wallSheathingMm;
+    const overhangRise = overhangRun * riseRatio;
+
+    const mainRafterLen = actualRun * multiplier;
+    const overhangRafterLen = overhangRun * multiplier;
+    const totalRafterLen = mainRafterLen + overhangRafterLen;
+
+    const seatCutVal = wallThickness + wallSheathingMm;
+    const plumbCutVal = seatCutVal * riseRatio;
+    const hapVal = (rafterDepth * multiplier) - plumbCutVal;
+    const totalRiseVal = actualRise + hapVal;
+    const tempPostHeight = totalRiseVal - ridgeDepth;
+
+    document.getElementById('res-main').innerHTML = `<b>본 서까래 길이: ${mainRafterLen.toFixed(1)} mm</b>`;
+    document.getElementById('res-overhang').innerHTML = `<b>처마 서까래 길이: ${overhangRafterLen.toFixed(1)} mm</b>`;
+    document.getElementById('res-cuts').innerHTML = `<b>HAP : ${hapVal.toFixed(1)}</b> / 시트컷(Seat) : ${seatCutVal.toFixed(1)} / 플럼컷(Plumb) : ${plumbCutVal.toFixed(1)}`;
+    document.getElementById('res-temp-post').innerHTML = `<b>임시기둥 높이 : ${tempPostHeight.toFixed(1)} mm</b>`;
+    document.getElementById('res-total').innerHTML = `서까래 총 길이: ${totalRafterLen.toFixed(1)} mm`;
+}
+// [A] 서까래 계산 로직 함수 (끝)
+// =========================================================================
+
+
+// =========================================================================
+// [B] 힙·잭서까래 계산 로직 함수 (시작)
+// =========================================================================
+function calculateHipJack() {
+    const halfSpanMm = parseFloat(document.getElementById('halfSpanInput2').value) || 0;
+    const overhangMm = parseFloat(document.getElementById('overhang2').value) || 0;
+    const wallThickness = parseFloat(document.getElementById('wallType2').value) || 0;
+    
+    const sheathingSelect = document.getElementById('wallSheathing2').value;
+    let wallSheathingMm = (sheathingSelect === 'custom') ? (parseFloat(document.getElementById('customSheathingInput2').value) || 0) : (parseFloat(sheathingSelect) || 0);
+
+    const subFasciaMm = parseFloat(document.getElementById('subFascia2').value) || 0;
+    
+    const angleInputVal = document.getElementById('roofAngle2').value;
+    const pitchInputVal = document.getElementById('pitchRise2').value;
+
+    let multiplier = 0, riseRatio = 0;
+    if (document.activeElement.id === 'roofAngle2' && angleInputVal !== '') {
+        document.getElementById('pitchRise2').value = '';
+        const rad = parseFloat(angleInputVal) * (Math.PI / 180);
+        multiplier = 1 / Math.cos(rad);
+        riseRatio = Math.tan(rad);
+    } else if (document.activeElement.id === 'pitchRise2' && pitchInputVal !== '') {
+        document.getElementById('roofAngle2').value = '';
+        const pRise = parseFloat(pitchInputVal);
+        multiplier = Math.sqrt(Math.pow(10, 2) + Math.pow(pRise, 2)) / 10;
+        riseRatio = pRise / 10;
+    } else {
+        if (pitchInputVal !== '') {
+            const pRise = parseFloat(pitchInputVal);
+            multiplier = Math.sqrt(Math.pow(10, 2) + Math.pow(pRise, 2)) / 10;
+            riseRatio = pRise / 10;
+        } else if (angleInputVal !== '') {
+            const rad = parseFloat(angleInputVal) * (Math.PI / 180);
+            multiplier = 1 / Math.cos(rad);
+            riseRatio = Math.tan(rad);
+        } else {
+            return;
+        }
+    }
+
+    const ridgeThicknessHalf = 19;
+    const actualRun = halfSpanMm + (wallThickness / 2) + wallSheathingMm - ridgeThicknessHalf;
+    const actualRise = actualRun * riseRatio;
+
+    const overhangRun = overhangMm - subFasciaMm - (wallThickness / 2) - wallSheathingMm;
+    const overhangRise = overhangRun * riseRatio;
+
+    const mainRafterLen = actualRun * multiplier;
+    const mainHipLen = Math.sqrt(2 * Math.pow(actualRun, 2) + Math.pow(actualRise, 2));
+    const overhangHipLen = Math.sqrt(2 * Math.pow(overhangRun, 2) + Math.pow(overhangRise, 2));
+    const hipRafterLen = mainHipLen + overhangHipLen;
+
+    const spacingSelect = document.getElementById('rafterSpacing').value;
+    let spacingMm = 406;
+    if (spacingSelect === 'custom') {
+        spacingMm = parseFloat(document.getElementById('customSpacingInput').value) || 406;
+    } else {
+        spacingMm = parseFloat(spacingSelect) || 406;
+    }
+
+    const commonDiff = spacingMm * multiplier;
+
+    document.getElementById('res-hip').innerHTML = `<b>힙 서까래 총 길이: ${hipRafterLen.toFixed(1)} mm</b>`;
+    document.getElementById('res-diff').innerHTML = `<b>잭 서까래 길이 감소치 (Common Diff): ${commonDiff.toFixed(1)} mm</b>`;
+
+    const count = parseInt(document.getElementById('jackCount').value) || 4;
+    let longestJackLen = mainRafterLen - commonDiff;
+    if (longestJackLen < 0) longestJackLen = 0;
+
+    let jackHtml = `<b>[가장 긴 잭 서까래 및 순차적 길이 (${count}개)]</b><br>`;
+    jackHtml += `🔥 <span style="color: #c0392b;">1번 잭 서까래:</span> <b>${longestJackLen.toFixed(1)} mm</b><br>`;
+    
+    for (let i = 1; i <= count; i++) {
+        let currentJack = longestJackLen - ((i - 1) * commonDiff);
+        if (currentJack < 0) currentJack = 0;
+        jackHtml += `&nbsp;&nbsp;• ${i}번 잭 서까래: <b>${currentJack.toFixed(1)} mm</b><br>`;
+    }
+    document.getElementById('res-jack-list').innerHTML = jackHtml;
+}
+// [B] 힙·잭서까래 계산 로직 함수 (끝)
+// =========================================================================
+
+
+// =========================================================================
+// [C] 목조계산기(역산) 로직 함수 (시작)
+// =========================================================================
+function runReverseCalc() {
+    const runVal = document.getElementById('calcRun').value.trim();
+    const riseVal = document.getElementById('calcRise').value.trim();
+    const angleVal = document.getElementById('calcAngle').value.trim();
+
+    const hasRun = runVal !== '' && !isNaN(parseFloat(runVal));
+    const hasRise = riseVal !== '' && !isNaN(parseFloat(riseVal));
+    const hasAngle = angleVal !== '' && !isNaN(parseFloat(angleVal));
+
+    const resultBox = document.getElementById('reverseResultBox');
+    const outputEl = document.getElementById('res-reverse-output');
+
+    if (hasRun && hasRise && !hasAngle) {
+        const deg = (Math.atan(parseFloat(riseVal) / parseFloat(runVal)) * (180 / Math.PI)).toFixed(2);
+        outputEl.innerHTML = `경사 각도: <b>${deg}°</b>`;
+        resultBox.style.display = 'block';
+    } else if (hasRun && hasAngle && !hasRise) {
+        const rise = (parseFloat(runVal) * Math.tan(parseFloat(angleVal) * (Math.PI / 180))).toFixed(1);
+        outputEl.innerHTML = `Rise (높이): <b>${rise} mm</b>`;
+        resultBox.style.display = 'block';
+    } else if (hasRise && hasAngle && !hasRun) {
+        const run = (parseFloat(riseVal) / Math.tan(parseFloat(angleVal) * (Math.PI / 180))).toFixed(1);
+        outputEl.innerHTML = `Run (밑변): <b>${run} mm</b>`;
+        resultBox.style.display = 'block';
+    } else {
+        alert('계산할 두 개의 값만 입력하고, 나머지 빈 칸 하나는 비워둔 채 [=] 버튼을 눌러주세요.');
+    }
+}
+
+function resetCalc() {
+    document.getElementById('calcRun').value = '';
+    document.getElementById('calcRise').value = '';
+    document.getElementById('calcAngle').value = '';
+    document.getElementById('reverseResultBox').style.display = 'none';
+}
+// [C] 목조계산기(역산) 로직 함수 (끝)
+// =========================================================================
+
+
+// =========================================================================
+// [D] 박공 스터드 계산 로직 함수 (시작)
+// =========================================================================
+function runGableCalc() {
+    const runVal = parseFloat(document.getElementById('gableRun').value) || 0;
+    const angleVal = parseFloat(document.getElementById('gableAngle').value) || 0;
+    
+    const spacingSelect = document.getElementById('gableSpacing').value;
+    let spacingMm = 406;
+    if (spacingSelect === 'custom') {
+        spacingMm = parseFloat(document.getElementById('customGableSpacing').value) || 406;
+    } else {
+        spacingMm = parseFloat(spacingSelect) || 406;
+    }
+
+    if (runVal <= 0 || angleVal <= 0 || spacingMm <= 0) {
+        document.getElementById('res-gable-list').innerHTML = `밑변, 경사각, 스터드 간격을 올바르게 입력해주세요.`;
+        return;
+    }
+
+    const rad = angleVal * (Math.PI / 180);
+    const tanVal = Math.tan(rad);
+
+    const maxHeight = runVal * tanVal;
+
+    let studs = [];
+    // 중앙(용마루) 최고 높이도 스터드 목록에 포함
+    studs.push({ dist: runVal, height: maxHeight });
+
+    let currentDist = runVal - spacingMm; 
+    let index = 1;
+
+    while (currentDist > 0) {
+        let currentHeight = currentDist * tanVal;
+        studs.push({ dist: currentDist, height: currentHeight });
+        currentDist -= spacingMm;
+        index++;
+        if (index > 25) break; 
+    }
+
+    let gableHtml = `<b>[가장 높은 스터드부터 순서대로]</b><br>`;
+
+    if (studs.length === 0) {
+        gableHtml += `&nbsp;&nbsp;입력하신 간격이 밑변보다 커서 내부 스터드가 없습니다.`;
+    } else {
+        // 큰 높이부터 내림차순 정렬 (용마루가 포함된 가장 높은 값이 1순위가 됨)
+        studs.sort((a, b) => b.height - a.height);
+
+        studs.forEach((stud, i) => {
+            gableHtml += `&nbsp;&nbsp;• ${i + 1}순위 스터드: <b>${stud.height.toFixed(1)} mm</b><br>`;
+        });
+    }
+
+    document.getElementById('res-gable-list').innerHTML = gableHtml;
+}
+// [D] 박공 스터드 계산 로직 함수 (끝)
+// =========================================================================
+</script>
+
+</body>
+</html>
