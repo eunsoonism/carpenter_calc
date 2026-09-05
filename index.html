@@ -713,7 +713,7 @@ function calculateHipJack() {
     const commonDiff = spacingMm * multiplier;
 
     document.getElementById('res-hip').innerHTML = `<b>힙 서까래 총 길이: ${hipRafterLen.toFixed(1)} mm</b>`;
-    document.getElementById('res-diff').innerHTML = `<b>잭 서까래 길이 감소치 (Common Diff): ${commonDiff.toFixed(1)} mm</b>`;
+    document.getElementById('res-diff').innerHTML = `<b>잭 서까래 길이 감소치: ${commonDiff.toFixed(1)} mm</b>`;
 
     const count = parseInt(document.getElementById('jackCount').value) || 4;
     let longestJackLen = mainRafterLen - commonDiff;
