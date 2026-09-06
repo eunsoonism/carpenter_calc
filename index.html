@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <head>
     <!-- ===================================================================== -->
-    <!-- 핸드폰 아이콘 사진 (시작)                           -->
+    <!-- 핸드폰 아이콘 사진 (시작)                                       -->
     <!-- ===================================================================== -->
     <link rel="apple-touch-icon" href="icon.png">
     <!-- ===================================================================== -->
-    <!-- 핸드폰 아이콘 사진 (끝)                             -->
+    <!-- 핸드폰 아이콘 사진 (끝)                                         -->
     <!-- ===================================================================== -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -204,16 +203,94 @@
     <div class="subtitle">(기준 : 외벽 중심)</div>
 
     <div class="tab-menu">
-        <button type="button" class="tab-btn active" onclick="switchTab(event, 'tab-rafter')">서까래</button>
+        <button type="button" class="tab-btn active" onclick="switchTab(event, 'tab-reverse')">목조계산기</button>
+        <button type="button" class="tab-btn" onclick="switchTab(event, 'tab-rafter')">서까래</button>
         <button type="button" class="tab-btn" onclick="switchTab(event, 'tab-hipjack')">힙·잭서까래</button>
-        <button type="button" class="tab-btn" onclick="switchTab(event, 'tab-reverse')">목조계산기</button>
     </div>
+
+
+    <!-- ===================================================================== -->
+    <!-- [3] 목조계산기 탭 UI 영역 (시작)                                     -->
+    <!-- ===================================================================== -->
+    <div id="tab-reverse" class="tab-content active">
+        <div class="calc-desc">
+            💡 <b>목조계산기 사용법</b><br>
+            Run, Rise, 각도 중 2개만 넣고 [=] 버튼을 누르세요.
+        </div>
+        <div class="input-group">
+            <div class="calc-layout">
+                <div class="input-box">
+                    <label for="calcRun">Run</label>
+                    <input type="number" step="any" id="calcRun" placeholder="밑변">
+                </div>
+                <div class="input-box">
+                    <label for="calcRise">Rise</label>
+                    <input type="number" step="any" id="calcRise" placeholder="높이">
+                </div>
+                <div class="input-box">
+                    <label for="calcAngle">각도 (°)</label>
+                    <input type="number" step="any" id="calcAngle" placeholder="각도">
+                </div>
+                <div class="calc-btn-box">
+                    <button type="button" class="action-btn" onclick="runReverseCalc()">=</button>
+                    <button type="button" class="reset-btn" onclick="resetCalc()">초기화</button>
+                </div>
+            </div>
+        </div>
+        <div class="result-box" id="reverseResultBox" style="display: none; background-color: #fef9e7; border-left-color: #f39c12; margin-top: 15px;">
+            <h3 style="color: #d68910; margin-bottom: 8px;">계산 결과</h3>
+            <div class="result-item" id="res-reverse-output"></div>
+        </div>
+
+        <!-- 박공 스터드 계산 영역 추가 -->
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 25px 0 20px 0;">
+        
+        <div class="calc-desc">
+            📐 <b>박공 스터드 (Gable Stud) 계산</b><br>
+            밑변(Run), 경사각, 스터드 간격을 입력하면 스터드 높이가 큰 순서대로 실시간 산출됩니다.
+        </div>
+
+        <div class="input-group">
+            <div class="triple-inputs">
+                <div class="input-box">
+                    <label for="gableRun">밑변 (Run)</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="gableRun" value="3600">
+                        <span class="unit-text">mm</span>
+                    </div>
+                </div>
+                <div class="input-box">
+                    <label for="gableAngle">경사각 (°)</label>
+                    <input type="number" step="any" id="gableAngle" value="31.0" placeholder="예: 31.0">
+                </div>
+                <div class="input-box">
+                    <label for="gableSpacing">스터드 간격</label>
+                    <select id="gableSpacing">
+                        <option value="406" selected>16인치 (406)</option>
+                        <option value="610">24인치 (610)</option>
+                        <option value="custom">직접 입력</option>
+                    </select>
+                    <input type="number" id="customGableSpacing" class="custom-input-box" placeholder="간격(mm)">
+                </div>
+            </div>
+        </div>
+
+        <div class="result-box" id="gableResultBox" style="background-color: #fef9e7; border-left-color: #f39c12; margin-top: 15px;">
+            <h3 style="color: #d68910; margin-bottom: 8px;">박공 스터드 산출 결과</h3>
+            <div class="result-item" id="res-gable-diff" style="display: none;"></div>
+            <div class="result-item" id="res-gable-list" style="margin-top: 2px; font-size: 0.9rem; line-height: 1.5;">
+                -
+            </div>
+        </div>
+    </div>
+    <!-- [3] 목조계산기 탭 UI 영역 (끝) -->
+    <!-- ===================================================================== -->
 
 
     <!-- ===================================================================== -->
     <!-- [1] 서까래 탭 UI 영역 (시작)                                          -->
     <!-- ===================================================================== -->
-    <div id="tab-rafter" class="tab-content active">
+    <div id="tab-rafter" class="tab-content">
         <div class="input-group">
             <div class="dual-inputs">
                 <div class="input-box" style="flex: 1.2;">
@@ -314,7 +391,7 @@
 
 
     <!-- ===================================================================== -->
-    <!-- [2] 힙·잭서까래 탭 UI 영역 (시작)                                     -->
+    <!-- [2] 힙·잭서까래 탭 UI 영역 (시작)                                    -->
     <!-- ===================================================================== -->
     <div id="tab-hipjack" class="tab-content">
         <div class="input-group">
@@ -405,84 +482,6 @@
         </div>
     </div>
     <!-- [2] 힙·잭서까래 탭 UI 영역 (끝) -->
-    <!-- ===================================================================== -->
-
-
-    <!-- ===================================================================== -->
-    <!-- [3] 목조계산기 탭 UI 영역 (시작)                                      -->
-    <!-- ===================================================================== -->
-    <div id="tab-reverse" class="tab-content">
-        <div class="calc-desc">
-            💡 <b>목조계산기 사용법</b><br>
-            Run, Rise, 각도 중 2개만 넣고 [=] 버튼을 누르세요.
-        </div>
-        <div class="input-group">
-            <div class="calc-layout">
-                <div class="input-box">
-                    <label for="calcRun">Run</label>
-                    <input type="number" step="any" id="calcRun" placeholder="밑변">
-                </div>
-                <div class="input-box">
-                    <label for="calcRise">Rise</label>
-                    <input type="number" step="any" id="calcRise" placeholder="높이">
-                </div>
-                <div class="input-box">
-                    <label for="calcAngle">각도 (°)</label>
-                    <input type="number" step="any" id="calcAngle" placeholder="각도">
-                </div>
-                <div class="calc-btn-box">
-                    <button type="button" class="action-btn" onclick="runReverseCalc()">=</button>
-                    <button type="button" class="reset-btn" onclick="resetCalc()">초기화</button>
-                </div>
-            </div>
-        </div>
-        <div class="result-box" id="reverseResultBox" style="display: none; background-color: #fef9e7; border-left-color: #f39c12; margin-top: 15px;">
-            <h3 style="color: #d68910; margin-bottom: 8px;">계산 결과</h3>
-            <div class="result-item" id="res-reverse-output"></div>
-        </div>
-
-        <!-- 박공 스터드 계산 영역 추가 -->
-        <hr style="border: none; border-top: 1px solid #ddd; margin: 25px 0 20px 0;">
-        
-        <div class="calc-desc">
-            📐 <b>박공 스터드 (Gable Stud) 계산</b><br>
-            밑변(Run), 경사각, 스터드 간격을 입력하면 스터드 높이가 큰 순서대로 실시간 산출됩니다.
-        </div>
-
-        <div class="input-group">
-            <div class="triple-inputs">
-                <div class="input-box">
-                    <label for="gableRun">밑변 (Run)</label>
-                    <div class="input-with-unit">
-                        <input type="number" id="gableRun" value="3600">
-                        <span class="unit-text">mm</span>
-                    </div>
-                </div>
-                <div class="input-box">
-                    <label for="gableAngle">경사각 (°)</label>
-                    <input type="number" step="any" id="gableAngle" value="31.0" placeholder="예: 31.0">
-                </div>
-                <div class="input-box">
-                    <label for="gableSpacing">스터드 간격</label>
-                    <select id="gableSpacing">
-                        <option value="406" selected>16인치 (406)</option>
-                        <option value="610">24인치 (610)</option>
-                        <option value="custom">직접 입력</option>
-                    </select>
-                    <input type="number" id="customGableSpacing" class="custom-input-box" placeholder="간격(mm)">
-                </div>
-            </div>
-        </div>
-
-        <div class="result-box" id="gableResultBox" style="background-color: #fef9e7; border-left-color: #f39c12; margin-top: 15px;">
-            <h3 style="color: #d68910; margin-bottom: 8px;">박공 스터드 산출 결과</h3>
-            <div class="result-item" id="res-gable-diff" style="display: none;"></div>
-            <div class="result-item" id="res-gable-list" style="margin-top: 2px; font-size: 0.9rem; line-height: 1.5;">
-                -
-            </div>
-        </div>
-    </div>
-    <!-- [3] 목조계산기 탭 UI 영역 (끝) -->
     <!-- ===================================================================== -->
 
 </div>
@@ -790,45 +789,43 @@ function runGableCalc() {
         spacingMm = parseFloat(spacingSelect) || 406;
     }
 
+    const resultBox = document.getElementById('gableResultBox');
+    const diffEl = document.getElementById('res-gable-diff');
+    const listEl = document.getElementById('res-gable-list');
+
     if (runVal <= 0 || angleVal <= 0 || spacingMm <= 0) {
-        document.getElementById('res-gable-list').innerHTML = `밑변, 경사각, 스터드 간격을 올바르게 입력해주세요.`;
+        resultBox.style.display = 'block';
+        diffEl.style.display = 'none';
+        listEl.innerHTML = '올바른 밑변, 각도, 간격 값을 입력해주세요.';
         return;
     }
 
     const rad = angleVal * (Math.PI / 180);
-    const tanVal = Math.tan(rad);
+    const riseRatio = Math.tan(rad);
+    
+    const centerPeakHeight = runVal * riseRatio;
+    const commonDiff = spacingMm * riseRatio;
 
-    const maxHeight = runVal * tanVal;
+    diffEl.style.display = 'block';
+    diffEl.innerHTML = `<b>스터드 길이 감소치 (Common Diff): ${commonDiff.toFixed(1)} mm</b>`;
 
-    let studs = [];
-    // 중앙(용마루) 최고 높이도 스터드 목록에 포함
-    studs.push({ dist: runVal, height: maxHeight });
+    let gableHtml = `<b>[가장 긴 센터 스터드 및 순차적 길이]</b><br>`;
+    gableHtml += `🔥 <span style="color: #c0392b;">1순위 (정중앙 킹스터드):</span> <b>${centerPeakHeight.toFixed(1)} mm</b> <span style="font-size: 0.8rem; color: #666;">(상단 수평 절단)</span><br>`;
 
-    let currentDist = runVal - spacingMm; 
-    let index = 1;
-
-    while (currentDist > 0) {
-        let currentHeight = currentDist * tanVal;
-        studs.push({ dist: currentDist, height: currentHeight });
-        currentDist -= spacingMm;
-        index++;
-        if (index > 25) break; 
+    let currentDist = spacingMm;
+    let rank = 2;
+    while (currentDist < runVal && rank <= 12) {
+        let currentHeight = centerPeakHeight - (currentDist * riseRatio);
+        if (currentHeight < 0) currentHeight = 0;
+        
+        gableHtml += `&nbsp;&nbsp;• ${rank}순위 스터드: <b>${currentHeight.toFixed(1)} mm</b> <span style="font-size: 0.8rem; color: #666;">(사선 플럼컷)</span><br>`;
+        
+        currentDist += spacingMm;
+        rank++;
     }
 
-    let gableHtml = `<b>[가장 높은 스터드부터 순서대로]</b><br>`;
-
-    if (studs.length === 0) {
-        gableHtml += `&nbsp;&nbsp;입력하신 간격이 밑변보다 커서 내부 스터드가 없습니다.`;
-    } else {
-        // 큰 높이부터 내림차순 정렬 (용마루가 포함된 가장 높은 값이 1순위가 됨)
-        studs.sort((a, b) => b.height - a.height);
-
-        studs.forEach((stud, i) => {
-            gableHtml += `&nbsp;&nbsp;• ${i + 1}순위 스터드: <b>${stud.height.toFixed(1)} mm</b><br>`;
-        });
-    }
-
-    document.getElementById('res-gable-list').innerHTML = gableHtml;
+    listEl.innerHTML = gableHtml;
+    resultBox.style.display = 'block';
 }
 // [D] 박공 스터드 계산 로직 함수 (끝)
 // =========================================================================
