@@ -1,1170 +1,856 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <link rel="apple-touch-icon" href="calc_icon.png">
+    <!-- ===================================================================== -->
+    <!-- 핸드폰 아이콘 사진 (시작)                                       -->
+    <!-- ===================================================================== -->
+    <link rel="apple-touch-icon" href="icon.png">
+    <!-- ===================================================================== -->
+    <!-- 핸드폰 아이콘 사진 (끝)                                         -->
+    <!-- ===================================================================== -->
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Construction Master Pro - Fraction Engine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>목조 계산기</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            touch-action: manipulation;
-            -webkit-user-select: none;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
         body {
-            background-color: #1e272e;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            padding: 12px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
         }
-
-        .calculator {
-            background: linear-gradient(135deg, #f39c12, #d35400);
-            width: 92vw;
-            max-width: 420px;
-            height: 95vh;
-            max-height: 880px;
-            padding: 16px 14px;
-            border-radius: 22px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .top-grip {
-            width: 80px;
-            height: 8px;
-            background-color: #2c3e50;
-            border-radius: 4px;
-            margin: 0 auto 10px auto;
-            flex-shrink: 0;
-        }
-
-        .console {
-            background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
-            width: 100%;
-            height: 100%;
-            padding: 12px;
+        .container {
+            max-width: 440px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
             border-radius: 12px;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-            display: flex;
-            flex-direction: column;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-
-        .branding {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 6px;
-            padding: 0 2px;
-            flex-shrink: 0;
-        }
-
-        .brand-title {
-            font-style: italic;
-            font-weight: 800;
-            font-size: 1.5rem;
+        h2 {
+            text-align: center;
             color: #2c3e50;
+            font-size: 1.25rem;
+            margin-bottom: 5px;
         }
-
-        .screen-container {
-            background-color: #bdc5b5;
-            width: 100%;
-            height: 16%;
-            min-height: 85px;
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+        .tab-menu {
+            display: flex;
+            background: #e0e6ed;
+            border-radius: 8px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 10px 0;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #555;
+            cursor: pointer;
             border-radius: 6px;
-            border: 3px solid #7f8c8d;
-            box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.4);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 4px 10px;
-            margin-bottom: 10px;
-            position: relative;
-            flex-shrink: 0;
-            overflow: hidden;
+            text-align: center;
         }
-
-        .screen-history {
-            position: absolute;
-            top: 6px;
-            right: 10px;
-            font-size: 0.72rem;
-            font-weight: bold;
-            color: #2c3e50;
-            max-width: 65%;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-align: right;
+        .tab-btn.active {
+            background: #fff;
+            color: #1abc9c;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-
-        .screen-main-wrapper {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-top: 14px;
-            overflow: hidden;
-        }
-
-        .screen-label-left {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #111;
-            white-space: nowrap;
-            margin-right: 6px;
-            flex-shrink: 0;
-        }
-
-        .screen-main {
-            font-size: 1.7rem;
-            font-weight: bold;
-            color: #111;
-            white-space: nowrap;
-            overflow-x: auto;
-            text-align: right;
-            flex-grow: 1;
-            transition: font-size 0.1s ease;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .screen-main::-webkit-scrollbar {
+        .tab-content {
             display: none;
         }
-
-        .stacked-fraction {
-            display: inline-flex;
-            flex-direction: column;
-            vertical-align: middle;
-            text-align: center;
-            font-size: 0.6em;
-            line-height: 0.9;
-            margin: 0 3px;
+        .tab-content.active {
+            display: block;
+        }
+        .calc-desc {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 9px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+        .input-with-unit {
             position: relative;
-            top: -0.05em;
-        }
-
-        .stacked-fraction .num {
-            border-bottom: 1.8px solid #111;
-            padding: 0 2px 1px 2px;
-            font-weight: bold;
-        }
-
-        .stacked-fraction .den {
-            padding: 1px 2px 0 2px;
-            font-weight: bold;
-        }
-
-        .result-wrapper {
-            display: inline-flex;
-            align-items: center;
-        }
-
-        .keypad {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            grid-template-rows: repeat(9, 1fr);
-            gap: 4px;
-            width: 100%;
-            flex-grow: 1;
-        }
-
-        .key-group {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            height: 100%;
-            overflow: hidden;
         }
-
-        .shift-label {
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: #b9770e;
-            margin-bottom: 1px;
-            height: 12px;
-            text-align: center;
+        .input-with-unit input {
+            padding-right: 35px;
+        }
+        .unit-text {
+            position: absolute;
+            right: 12px;
+            color: #888;
+            font-size: 0.85rem;
+            pointer-events: none;
+        }
+        .dual-inputs {
+            display: flex;
+            gap: 10px;
+        }
+        .dual-inputs .input-box {
+            flex: 1;
+        }
+        .triple-inputs {
+            display: flex;
+            gap: 7px;
+        }
+        .triple-inputs .input-box {
+            flex: 1;
+        }
+        .calc-layout {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+        .calc-layout .input-box {
+            flex: 1;
+        }
+        .calc-layout label {
+            font-size: 0.8rem;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: clip;
-            width: 100%;
-            flex-shrink: 0;
-            letter-spacing: -0.5px;
         }
-
-        button {
-            width: 100%;
-            height: calc(100% - 13px);
-            border: none;
-            border-radius: 4px;
-            font-size: 2rem;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
-            transition: transform 0.01s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        button:active {
-            transform: translateY(2px);
-            box-shadow: none;
-        }
-
-        .btn-dark { background-color: #2c3e50; color: white; }
-        .btn-orange { background-color: #e67e22; color: white; }
-        .btn-red { background-color: #c0392b; color: white; }
-        .btn-light { background-color: #f8f9fa; color: #2c3e50; border: 1px solid #dcdde1; }
-        .btn-active { border: 2px solid #f1c40f !important; filter: brightness(1.1); }
-
-        .footer-brand {
-            margin-top: 6px;
+        .calc-layout input {
+            padding: 9px 6px;
+            font-size: 0.95rem;
             text-align: center;
-            font-size: 0.55rem;
+        }
+        .calc-btn-box {
+            display: flex;
+            gap: 4px;
+            flex: 0 0 auto;
+        }
+        /* = 버튼을 크게 변경 */
+        .action-btn {
+            background-color: #1abc9c;
+            color: white;
+            border: none;
+            padding: 9px 20px;
+            font-size: 1.1rem;
             font-weight: bold;
-            color: #333;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            flex-shrink: 0;
+            border-radius: 6px;
+            cursor: pointer;
+            height: 41px;
+            white-space: nowrap;
+        }
+        .action-btn:active {
+            background-color: #16a085;
+        }
+        /* 초기화 버튼을 작게 변경 및 원형 화살표 아이콘화 */
+        .reset-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 9px 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            height: 41px;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .reset-btn:active {
+            background-color: #c0392b;
+        }
+        .custom-input-box {
+            margin-top: 5px;
+            display: none;
+        }
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f8f5;
+            border-left: 5px solid #1abc9c;
+            border-radius: 4px;
+        }
+        .result-box h3 {
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            color: #16a085;
+        }
+        .result-item {
+            font-size: 0.95rem;
+            margin-bottom: 6px;
         }
     </style>
 </head>
 <body>
 
-<div class="calculator">
-    <div class="top-grip"></div>
-    
-    <div class="console">
-        <div class="branding">
-            <div>
-                <span class="brand-title">Eunsoo Master Pro</span>
-            </div>
-        </div>
+<div class="container">
+    <h2>목조 계산기</h2>
+    <div class="subtitle">(기준 : 외벽 중심)</div>
 
-        <div class="screen-container" id="screen-container">
-            <div class="screen-history" id="display-history"></div>
-            <div class="screen-main-wrapper">
-                <div class="screen-label-left" id="display-label"></div>
-                <div class="screen-main" id="display-main">0</div>
-            </div>
-        </div>
-
-        <div class="keypad">
-            <!-- Row 1 -->
-            <div class="key-group"><span class="shift-label"></span><button class="btn-red" onclick="handleOnClear(event)">On/C</button></div>
-            <div class="key-group"><span class="shift-label"></span><button class="btn-dark" style="visibility:hidden;"></button></div>
-            <div class="key-group"><span class="shift-label"></span><button class="btn-dark" style="visibility:hidden;"></button></div>
-            <div class="key-group"><span class="shift-label"></span><button class="btn-dark" style="visibility:hidden;"></button></div>
-            <div class="key-group"><span class="shift-label"></span><button class="btn-dark" style="visibility:hidden;"></button></div>
-
-            <!-- Row 2 -->
-            <div class="key-group"><span class="shift-label">Slope</span><button class="btn-dark" onclick="handleDimensionKey('Pitch')">Pitch</button></div>
-            <div class="key-group"><span class="shift-label">R/Wall</span><button class="btn-dark" onclick="handleDimensionKey('Rise')">Rise</button></div>
-            <div class="key-group"><span class="shift-label">Polygon</span><button class="btn-dark" onclick="handleDimensionKey('Run')">Run</button></div>
-            <div class="key-group"><span class="shift-label">Roof</span><button class="btn-dark" onclick="handleDimensionKey('Diag')">Diag</button></div>
-            <div class="key-group"><span class="shift-label">Tr/Pitch</span><button class="btn-dark" onclick="calcHipV()">Hip/V</button></div>
-
-            <!-- Row 3 -->
-            <div class="key-group"><span class="shift-label">Spring</span><button class="btn-dark">Comp</button></div>
-            <div class="key-group"><span class="shift-label">Riser</span><button class="btn-dark" onclick="handleStairButton()">Stair</button></div>
-            <div class="key-group"><span class="shift-label">Radius</span><button class="btn-dark">Arc</button></div>
-            <div class="key-group"><span class="shift-label">Column</span><button class="btn-dark">Circ</button></div>
-            <div class="key-group"><span class="shift-label">Tr/Jack</span><button class="btn-dark" onclick="calcJack()">Jack</button></div>
-
-            <!-- Row 4 -->
-            <div class="key-group"><span class="shift-label"></span><button class="btn-dark" onclick="appendUnit('m')">m</button></div>
-            <div class="key-group"><span class="shift-label">Blocks</span><button class="btn-dark" onclick="handleDimensionKey('Length')">Length</button></div>
-            <div class="key-group"><span class="shift-label">Footing</span><button class="btn-dark" onclick="handleDimensionKey('Width')">Width</button></div>
-            <div class="key-group"><span class="shift-label">Drywall</span><button class="btn-dark" onclick="handleDimensionKey('Height')">Height</button></div>
-            <div class="key-group"><span class="shift-label">x²</span><button class="btn-dark" onclick="calcSquare()">x²</button></div>
-
-            <!-- Row 5 -->
-            <div class="key-group"><span class="shift-label"></span><button class="btn-dark" onclick="handleUnitKey('yds')">Yds</button></div>
-            <div class="key-group"><span class="shift-label"></span><button class="btn-dark" onclick="handleUnitKey('feet')">Feet</button></div>
-            <div class="key-group"><span class="shift-label"></span><button class="btn-dark" onclick="handleUnitKey('inch')">Inch</button></div>
-            <div class="key-group"><span class="shift-label"></span><button class="btn-dark" onclick="appendFractionInput('/')">/</button></div>
-            <div class="key-group"><span class="shift-label">√x</span><button class="btn-dark" onclick="backspace()">←</button></div>
-
-            <!-- Row 6 -->
-            <div class="key-group"><span class="shift-label">Prefs</span><button class="btn-orange" id="btn-conv" onclick="toggleConv()">Conv</button></div>
-            <div class="key-group"><span class="shift-label">cm Riser</span><button class="btn-light" onclick="appendNum('7')">7</button></div>
-            <div class="key-group"><span class="shift-label">Bd Ft</span><button class="btn-light" onclick="appendNum('8')">8</button></div>
-            <div class="key-group"><span class="shift-label">mm Tread</span><button class="btn-light" onclick="appendNum('9')">9</button></div>
-            <div class="key-group"><span class="shift-label">1/x</span><button class="btn-dark" onclick="appendInput(' / ')">÷</button></div>
-
-            <!-- Row 7 -->
-            <div class="key-group"><span class="shift-label">Stor</span><button class="btn-dark" onclick="storeVal()">Stor</button></div>
-            <div class="key-group"><span class="shift-label">lbs Blk</span><button class="btn-light" onclick="appendNum('4')">4</button></div>
-            <div class="key-group"><span class="shift-label">Studs</span><button class="btn-light" onclick="appendNum('5')">5</button></div>
-            <div class="key-group"><span class="shift-label">tons Ftg</span><button class="btn-light" onclick="appendNum('6')">6</button></div>
-            <div class="key-group"><span class="shift-label">Clear</span><button class="btn-dark" onclick="appendInput(' * ')">×</button></div>
-
-            <!-- Row 8 -->
-            <div class="key-group"><span class="shift-label">M-R/C</span><button class="btn-dark" onclick="recallVal()">Rcl</button></div>
-            <div class="key-group"><span class="shift-label">kg M1</span><button class="btn-light" onclick="appendNum('1')">1</button></div>
-            <div class="key-group"><span class="shift-label">Acre M2</span><button class="btn-light" onclick="appendNum('2')">2</button></div>
-            <div class="key-group"><span class="shift-label">met tons</span><button class="btn-light" onclick="appendNum('3')">3</button></div>
-            <div class="key-group"><span class="shift-label">+/-</span><button class="btn-dark" onclick="appendInput(' - ')">−</button></div>
-
-            <!-- Row 9 -->
-            <div class="key-group"><span class="shift-label">M-</span><button class="btn-dark" onclick="memPlus()">M+</button></div>
-            <div class="key-group"><span class="shift-label">Cost</span><button class="btn-light" onclick="appendNum('0')">0</button></div>
-            <div class="key-group"><span class="shift-label">dms</span><button class="btn-light" onclick="appendNum('.')">.</button></div>
-            <div class="key-group"><span class="shift-label">Tape</span><button class="btn-dark" onclick="calculateResult()">=</button></div>
-            <div class="key-group"><span class="shift-label"></span><button class="btn-dark" onclick="appendInput(' + ')">+</button></div>
-        </div>
-
-        <div class="footer-brand">Calculated Industries (3-Way Toggle Edition)</div>
+    <div class="tab-menu">
+        <button type="button" class="tab-btn active" onclick="switchTab(event, 'tab-reverse')">목조계산기</button>
+        <button type="button" class="tab-btn" onclick="switchTab(event, 'tab-rafter')">서까래</button>
+        <button type="button" class="tab-btn" onclick="switchTab(event, 'tab-hipjack')">힙·잭서까래</button>
     </div>
+
+
+    <!-- ===================================================================== -->
+    <!-- [3] 목조계산기 탭 UI 영역 (시작)                                     -->
+    <!-- ===================================================================== -->
+    <div id="tab-reverse" class="tab-content active">
+        <div class="calc-desc">
+            💡 <b>목조계산기 사용법</b><br>
+            Run, Rise, 각도 중 2개만 넣고 [=] 버튼을 누르세요.
+        </div>
+        <div class="input-group">
+            <div class="calc-layout">
+                <div class="input-box">
+                    <label for="calcRun">Run</label>
+                    <input type="number" step="any" id="calcRun" placeholder="밑변">
+                </div>
+                <div class="input-box">
+                    <label for="calcRise">Rise</label>
+                    <input type="number" step="any" id="calcRise" placeholder="높이">
+                </div>
+                <div class="input-box">
+                    <label for="calcAngle">각도 (°)</label>
+                    <input type="number" step="any" id="calcAngle" placeholder="각도">
+                </div>
+                <div class="calc-btn-box">
+                    <button type="button" class="action-btn" onclick="runReverseCalc()">=</button>
+                    <button type="button" class="reset-btn" onclick="resetCalc()" title="초기화">↻</button>
+                </div>
+            </div>
+        </div>
+        <div class="result-box" id="reverseResultBox" style="display: none; background-color: #fef9e7; border-left-color: #f39c12; margin-top: 15px;">
+            <h3 style="color: #d68910; margin-bottom: 8px;">계산 결과</h3>
+            <div class="result-item" id="res-reverse-output"></div>
+        </div>
+
+        <!-- 박공 스터드 계산 영역 추가 -->
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 25px 0 20px 0;">
+        
+        <div class="calc-desc">
+            📐 <b>박공 스터드 (Gable Stud) 계산</b><br>
+            밑변(Run), 경사각, 스터드 간격을 입력하면 스터드 높이가 큰 순서대로 실시간 산출됩니다.
+        </div>
+
+        <div class="input-group">
+            <div class="triple-inputs">
+                <div class="input-box">
+                    <label for="gableRun">밑변 (Run)</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="gableRun" value="3600">
+                        <span class="unit-text">mm</span>
+                    </div>
+                </div>
+                <div class="input-box">
+                    <label for="gableAngle">경사각 (°)</label>
+                    <input type="number" step="any" id="gableAngle" value="31.0" placeholder="예: 31.0">
+                </div>
+                <div class="input-box">
+                    <label for="gableSpacing">스터드 간격</label>
+                    <select id="gableSpacing">
+                        <option value="406" selected>16인치 (406)</option>
+                        <option value="610">24인치 (610)</option>
+                        <option value="custom">직접 입력</option>
+                    </select>
+                    <input type="number" id="customGableSpacing" class="custom-input-box" placeholder="간격(mm)">
+                </div>
+            </div>
+        </div>
+
+        <div class="result-box" id="gableResultBox" style="background-color: #fef9e7; border-left-color: #f39c12; margin-top: 15px;">
+            <h3 style="color: #d68910; margin-bottom: 8px;">박공 스터드 산출 결과</h3>
+            <div class="result-item" id="res-gable-diff" style="display: none;"></div>
+            <div class="result-item" id="res-gable-list" style="margin-top: 2px; font-size: 0.9rem; line-height: 1.5;">
+                -
+            </div>
+        </div>
+    </div>
+    <!-- [3] 목조계산기 탭 UI 영역 (끝) -->
+    <!-- ===================================================================== -->
+
+
+    <!-- ===================================================================== -->
+    <!-- [1] 서까래 탭 UI 영역 (시작)                                          -->
+    <!-- ===================================================================== -->
+    <div id="tab-rafter" class="tab-content">
+        <div class="input-group">
+            <div class="dual-inputs">
+                <div class="input-box" style="flex: 1.2;">
+                    <label for="halfSpanInput1">Half Span (외벽 중심)</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="halfSpanInput1" value="4000">
+                        <span class="unit-text">mm</span>
+                    </div>
+                </div>
+                <div class="input-box" style="flex: 0.8;">
+                    <label for="overhang1">처마 길이</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="overhang1" value="500">
+                        <span class="unit-text">mm</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <div class="triple-inputs">
+                <div class="input-box">
+                    <label for="wallType1">외벽 스터드</label>
+                    <select id="wallType1">
+                        <option value="89">2x4 (89)</option>
+                        <option value="140" selected>2x6 (140)</option>
+                        <option value="184">2x8 (184)</option>
+                        <option value="0">직접 입력</option>
+                    </select>
+                </div>
+                <div class="input-box">
+                    <label for="rafterSize1">서까래 규격</label>
+                    <select id="rafterSize1">
+                        <option value="140">2x6 (140)</option>
+                        <option value="184">2x8 (184)</option>
+                        <option value="235" selected>2x10 (235)</option>
+                        <option value="286">2x12 (286)</option>
+                    </select>
+                </div>
+                <div class="input-box">
+                    <label for="ridgeSize1">용마루 규격</label>
+                    <select id="ridgeSize1">
+                        <option value="184">2x8 (184)</option>
+                        <option value="235" selected>2x10 (235)</option>
+                        <option value="286">2x12 (286)</option>
+                        <option value="custom">직접 입력</option>
+                    </select>
+                    <input type="number" id="customRidgeInput1" class="custom-input-box" placeholder="높이(mm)">
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <div class="dual-inputs">
+                <div class="input-box">
+                    <label for="wallSheathing1">외벽 합판 두께</label>
+                    <select id="wallSheathing1">
+                        <option value="9.5">9.5</option>
+                        <option value="11.1" selected>11.1 (기본)</option>
+                        <option value="12">12.0</option>
+                        <option value="custom">직접 입력</option>
+                    </select>
+                    <input type="number" step="0.5" id="customSheathingInput1" class="custom-input-box" placeholder="두께">
+                </div>
+                <div class="input-box">
+                    <label for="subFascia1">서브페이샤</label>
+                    <input type="number" id="subFascia1" value="38">
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <div class="dual-inputs">
+                <div class="input-box">
+                    <label for="roofAngle1">경사 각도 (°)</label>
+                    <input type="number" step="0.001" id="roofAngle1" value="" placeholder="예: 31.0">
+                </div>
+                <div class="input-box">
+                    <label for="pitchRise1">물매 (10 : X)</label>
+                    <input type="number" step="0.1" id="pitchRise1" value="6" placeholder="예: 6">
+                </div>
+            </div>
+        </div>
+
+        <div class="result-box" id="result">
+            <h3>산출결과</h3>
+            <div class="result-item" id="res-main"><b>본 서까래 길이: - mm</b></div>
+            <div class="result-item" id="res-overhang"><b>처마 서까래 길이: - mm</b></div>
+            <div class="result-item" id="res-cuts"><b>HAP : -</b> / 시트컷(Seat) : - / 플럼컷(Plumb) : -</div>
+            <div class="result-item" id="res-temp-post"><b>임시기둥 높이 : - mm</b></div>
+            <div class="result-item" id="res-total" style="font-weight: bold; border-top: 1px solid #b2dfdb; padding-top: 6px; margin-top: 6px;">
+                서까래 총 길이: - mm
+            </div>
+        </div>
+    </div>
+    <!-- [1] 서까래 탭 UI 영역 (끝) -->
+    <!-- ===================================================================== -->
+
+
+    <!-- ===================================================================== -->
+    <!-- [2] 힙·잭서까래 탭 UI 영역 (시작)                                    -->
+    <!-- ===================================================================== -->
+    <div id="tab-hipjack" class="tab-content">
+        <div class="input-group">
+            <div class="dual-inputs">
+                <div class="input-box" style="flex: 1.2;">
+                    <label for="halfSpanInput2">Half Span (외벽 중심)</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="halfSpanInput2" value="4000">
+                        <span class="unit-text">mm</span>
+                    </div>
+                </div>
+                <div class="input-box" style="flex: 0.8;">
+                    <label for="overhang2">처마 길이</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="overhang2" value="500">
+                        <span class="unit-text">mm</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <div class="triple-inputs">
+                <div class="input-box">
+                    <label for="wallType2">외벽 스터드</label>
+                    <select id="wallType2">
+                        <option value="89">2x4 (89)</option>
+                        <option value="140" selected>2x6 (140)</option>
+                        <option value="184">2x8 (184)</option>
+                        <option value="0">직접 입력</option>
+                    </select>
+                </div>
+                <div class="input-box">
+                    <label for="wallSheathing2">외벽 합판 두께</label>
+                    <select id="wallSheathing2">
+                        <option value="9.5">9.5</option>
+                        <option value="11.1" selected>11.1 (기본)</option>
+                        <option value="12">12.0</option>
+                        <option value="custom">직접 입력</option>
+                    </select>
+                    <input type="number" step="0.5" id="customSheathingInput2" class="custom-input-box" placeholder="두께">
+                </div>
+                <div class="input-box">
+                    <label for="subFascia2">서브페이샤</label>
+                    <input type="number" id="subFascia2" value="38">
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <div class="dual-inputs">
+                <div class="input-box">
+                    <label for="roofAngle2">경사 각도 (°)</label>
+                    <input type="number" step="0.001" id="roofAngle2" value="" placeholder="예: 31.0">
+                </div>
+                <div class="input-box">
+                    <label for="pitchRise2">물매 (10 : X)</label>
+                    <input type="number" step="0.1" id="pitchRise2" value="6" placeholder="예: 6">
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <div class="dual-inputs">
+                <div class="input-box">
+                    <label for="rafterSpacing">서까래 간격</label>
+                    <select id="rafterSpacing">
+                        <option value="406" selected>16인치 (406 mm)</option>
+                        <option value="610">24인치 (610 mm)</option>
+                        <option value="custom">직접 입력</option>
+                    </select>
+                    <input type="number" id="customSpacingInput" class="custom-input-box" placeholder="간격(mm)">
+                </div>
+                <div class="input-box">
+                    <label for="jackCount">잭 서까래 수</label>
+                    <input type="number" id="jackCount" value="4" min="1" max="10">
+                </div>
+            </div>
+        </div>
+
+        <div class="result-box" id="jackResultBox" style="background-color: #fef9e7; border-left-color: #f39c12; margin-top: 15px;">
+            <h3 style="color: #d68910;">힙 & 잭 서까래 산출 결과</h3>
+            <div class="result-item" id="res-hip"><b>힙 서까래 총 길이: - mm</b></div>
+            <div class="result-item" id="res-diff"><b>잭 서까래 감소치 (Common Diff): - mm</b></div>
+            <div class="result-item" id="res-jack-list" style="margin-top: 8px; font-size: 0.9rem; line-height: 1.5;">
+                <b>[가장 긴 잭 서까래 및 순차적 길이]</b><br>-
+            </div>
+        </div>
+    </div>
+    <!-- [2] 힙·잭서까래 탭 UI 영역 (끝) -->
+    <!-- ===================================================================== -->
+
 </div>
 
 <script>
-    let currentInput = "0";
-    let activeMode = "STANDBY";
-    let currentLabel = "";
-    let memory = 0;
-    let historyInput = ""; 
-    
-    let isConvActive = false;
-    let memoryValues = { Pitch: 0, Rise: 0, Run: 0, Diag: 0, HipV: 0, Length: 0, Width: 0, Height: 0 };
-    
-    let jackSpacing = 406;
-    let jackList = [];
-    let jackIndex = -1;
-
-    let stairData = null;
-    let stairStep = 0;
-    let hipVState = 0; 
-
-    let desiredRiserHeight = 190.5;   
-    let desiredTreadWidth = 254;      
-    let stairHeadroom = 2032;         
-    let stairFloorThickness = 254;    
-
-    let awaitingStoreSlot = false;
-    let awaitingRecallSlot = false;
-    let pendingStoreValue = 0;
-    let isCalculatedState = false;
-
-    let clearClickCount = 0;
-    let clearClickTimer = null;
-
-    // --- mm/inch/feet/yds 단위 변환용 (Conv 연동) ---
-    let dimValueMM = null;   // 현재 화면 숫자의 실제 값(mm 기준, 내부 전용)
-    let dimEntryUnit = null; // 현재 화면에 표시 중인 단위
-
-    function formatVal(val) {
-        if (isNaN(val)) return "0";
-        let rounded = Math.round(val * 100) / 100;
-        return Number(rounded).toString();
-    }
-
-    function formatInchToStacked(totalInches) {
-        if (isNaN(totalInches)) return "0 in";
-        let sign = totalInches < 0 ? "-" : "";
-        let absVal = Math.abs(totalInches);
-        
-        let whole = Math.floor(absVal);
-        let rem = absVal - whole;
-        
-        let sixteenths = Math.round(rem * 16);
-        if (sixteenths === 16) {
-            whole += 1;
-            sixteenths = 0;
-        }
-
-        if (sixteenths === 0) {
-            return `${sign}${whole} in`;
-        }
-
-        let num = sixteenths;
-        let den = 16;
-        while (num % 2 === 0 && den % 2 === 0) {
-            num /= 2;
-            den /= 2;
-        }
-
-        let fracHtml = `<span class="stacked-fraction"><span class="num">${num}</span><span class="den">${den}</span></span>`;
-
-        if (whole === 0) {
-            return `<span class="result-wrapper">${sign}${fracHtml} in</span>`;
-        } else {
-            return `<span class="result-wrapper">${sign}${whole}${fracHtml} in</span>`;
-        }
-    }
-
-    // --- mm / inch / feet / yds 상호 변환 (Conv 연동, 신규) ---
-    const UNIT_FACTORS_MM = { mm: 1, inch: 25.4, feet: 304.8, yds: 914.4 };
-
-    function parseSimpleNumber(str) {
-        // 단순 숫자 또는 "3/4", "1 3/4" 형태의 분수 하나만 해석 (복합 feet-inch 문자열은 대상 아님)
-        let s = (str || "").toString().trim();
-        if (!s || s === "0") return 0;
-        let mixed = s.match(/^(-?\d+)\s+(\d+)\s*\/\s*(\d+)$/);
-        if (mixed) return parseInt(mixed[1], 10) + parseInt(mixed[2], 10) / parseInt(mixed[3], 10);
-        let frac = s.match(/^(-?\d+)\s*\/\s*(\d+)$/);
-        if (frac) return parseInt(frac[1], 10) / parseInt(frac[2], 10);
-        let f = parseFloat(s.replace(/[^0-9.\-]/g, ''));
-        return isNaN(f) ? 0 : f;
-    }
-
-    function formatFraction16Html(sixteenths) {
-        let num = sixteenths, den = 16;
-        while (num % 2 === 0 && den % 2 === 0) { num /= 2; den /= 2; }
-        return `<span class="stacked-fraction"><span class="num">${num}</span><span class="den">${den}</span></span>`;
-    }
-
-    function formatWholeFracInch(v) {
-        // v: 인치 단위의 소수 값 -> "3", "3<3/4분수>" 같은 HTML 반환 (inch 글자는 붙이지 않음)
-        let sign = v < 0 ? "-" : "";
-        let a = Math.abs(v);
-        let whole = Math.floor(a + 1e-9);
-        let sixteenths = Math.round((a - whole) * 16);
-        if (sixteenths === 16) { sixteenths = 0; whole += 1; }
-        let fracHtml = sixteenths !== 0 ? formatFraction16Html(sixteenths) : '';
-        return `${sign}${whole}${fracHtml}`;
-    }
-
-    function mmToSimpleUnitDisplay(mm, unit) {
-        let v = mm / UNIT_FACTORS_MM[unit];
-        if (unit === 'inch') return formatWholeFracInch(v) + 'inch';
-        return `${formatVal(v)}${unit}`;
-    }
-
-    function mmToFeetDisplay(mm) {
-        let sign = mm < 0 ? "-" : "";
-        let totalInch = Math.abs(mm) / 25.4;
-        let feet = Math.floor(totalInch / 12 + 1e-9);
-        let remInch = totalInch - feet * 12;
-        let whole = Math.floor(remInch + 1e-9);
-        let sixteenths = Math.round((remInch - whole) * 16);
-        if (sixteenths === 16) { sixteenths = 0; whole += 1; }
-        if (whole === 12) { whole = 0; feet += 1; }
-        let fracHtml = sixteenths !== 0 ? formatFraction16Html(sixteenths) : '';
-        let inchPart = `${whole}${fracHtml}inch`;
-        return feet !== 0 ? `${sign}${feet}F ${inchPart}` : `${sign}${inchPart}`;
-    }
-
-    // Feet / Inch / Yds 키, 그리고 Conv+9(mm)에서 공통으로 호출
-    function handleUnitKey(unit) {
-        historyInput = "";
-        const isConversion = isConvActive && dimValueMM !== null;
-
-        if (isConversion) {
-            // 기존 값을 이 단위로 변환해서 재표시 (Feet만 1F 4inch 식 복합 표기)
-            currentInput = (unit === 'feet')
-                ? mmToFeetDisplay(dimValueMM)
-                : mmToSimpleUnitDisplay(dimValueMM, unit);
-        } else {
-            // 새 값 입력: 화면 숫자를 이 단위로 새로 해석 (항상 단순 표기: 1feet, 1inch, 1yds, 1mm)
-            let n = parseSimpleNumber(currentInput);
-            dimValueMM = n * UNIT_FACTORS_MM[unit];
-            currentInput = (unit === 'inch') ? (formatWholeFracInch(n) + 'inch') : `${formatVal(n)}${unit}`;
-        }
-        dimEntryUnit = unit;
-        currentLabel = "";
-        isConvActive = false;
-        isCalculatedState = true; // 다음 숫자 입력은 새로 시작
-        updateDisplay();
-    }
-
-
-    function parseValue(str) {
-        if (!str) return 0;
-        let s = str.toString().trim().toUpperCase();
-        if (s === "0" || s.includes("STORED") || s.includes("ERR") || s.includes("NO JACKS") || s.includes("RISERS") || s.includes("O.C.")) {
-            return 0;
-        }
-
-        let clean = s.replace(/[^0-9.\/\s-]/g, '').trim();
-        let val = parseFloat(clean) || 0;
-
-        if (s.includes('MM')) return val;
-        if (s.includes('CM')) return val * 10;
-        if (s.includes('M') && !s.includes('MM') && !s.includes('CM')) return val * 1000;
-        if (s.includes('FEET') || s.includes('FT')) return val * 304.8;
-        if (s.includes('YDS')) return val * 914.4;
-        if (s.includes('IN')) return val * 25.4; 
-
-        return val;
-    }
-
-    function adjustFontSize() {
-        let main = document.getElementById("display-main");
-        let rawText = main.innerText || main.textContent || "";
-        let len = rawText.length;
-
-        if (len > 22) {
-            main.style.fontSize = "1.0rem";
-        } else if (len > 16) {
-            main.style.fontSize = "1.25rem";
-        } else if (len > 12) {
-            main.style.fontSize = "1.45rem";
-        } else {
-            main.style.fontSize = "1.7rem";
-        }
-
-        main.scrollLeft = main.scrollWidth;
-    }
-
-    function updateDisplay() {
-        let displayElem = document.getElementById("display-main");
-        displayElem.innerHTML = currentInput; 
-
-        let labelElem = document.getElementById("display-label");
-        labelElem.innerText = currentLabel;
-
-        document.getElementById("display-history").innerText = historyInput; 
-
-        let convBtn = document.getElementById("btn-conv");
-        if (isConvActive) {
-            convBtn.classList.add("btn-active");
-        } else {
-            convBtn.classList.remove("btn-active");
-        }
-
-        adjustFontSize();
-    }
-
-    function toggleConv() {
-        isConvActive = !isConvActive;
-        updateDisplay();
-    }
-
-    function appendUnit(targetUnit) {
-        historyInput = ""; 
-        let current = currentInput.trim();
-        
-        if (current === "0" || current.includes("ERR") || current.includes("STORED")) {
-            currentInput = `0 ${targetUnit}`;
-        } else {
-            currentInput = `${current} ${targetUnit}`;
-        }
-        
-        isConvActive = false;
-        isCalculatedState = false;
-        updateDisplay();
-    }
-
-    function appendNum(num) {
-        if (awaitingStoreSlot) {
-            awaitingStoreSlot = false;
-            historyInput = "";
-            if (num === '7') {
-                desiredRiserHeight = pendingStoreValue > 0 ? pendingStoreValue : desiredRiserHeight;
-                currentLabel = "R-HT";
-                currentInput = `${formatVal(desiredRiserHeight)} mm`;
-            } else if (num === '9') {
-                desiredTreadWidth = pendingStoreValue > 0 ? pendingStoreValue : desiredTreadWidth;
-                currentLabel = "T-WD";
-                currentInput = `${formatVal(desiredTreadWidth)} mm`;
-            } else {
-                memory = pendingStoreValue;
-                currentLabel = "";
-                currentInput = "STORED";
-                setTimeout(() => {
-                    currentInput = formatVal(memory);
-                    updateDisplay();
-                }, 800);
-            }
-            isCalculatedState = true;
-            updateDisplay();
-            return;
-        }
-
-        if (awaitingRecallSlot) {
-            awaitingRecallSlot = false;
-            historyInput = "";
-            if (num === '7') {
-                currentLabel = "R-HT";
-                currentInput = `${formatVal(desiredRiserHeight)} mm`;
-            } else if (num === '9') {
-                currentLabel = "T-WD";
-                currentInput = `${formatVal(desiredTreadWidth)} mm`;
-            } else {
-                currentLabel = "RCL";
-                currentInput = formatVal(memory);
-            }
-            isCalculatedState = true;
-            updateDisplay();
-            return;
-        }
-
-        if (isConvActive) {
-            if (num === '5') {
-                let val = parseValue(currentInput);
-                currentLabel = "O.C.";
-                if (val > 0) {
-                    jackSpacing = val;
-                    currentInput = `${formatVal(val)} mm`;
-                } else {
-                    currentInput = `406 mm`;
-                }
-                isConvActive = false;
-                isCalculatedState = true;
-                updateDisplay();
-                
-                setTimeout(() => {
-                    if (currentLabel === "O.C.") {
-                        currentLabel = "";
-                        currentInput = "0";
-                        isCalculatedState = false;
-                        updateDisplay();
-                    }
-                }, 1000);
-                return;
-            } else if (num === '9') {
-                handleUnitKey('mm');
-                return;
-            }
-            isConvActive = false;
-        }
-
-        if (isCalculatedState) {
-            currentInput = num;
-            currentLabel = "";
-            historyInput = "";
-            isCalculatedState = false;
-            dimValueMM = null;
-            dimEntryUnit = null;
-        } else {
-            if (currentInput === "0" || currentInput.includes("ERR") || currentInput.includes("O.C.")) {
-                currentInput = num;
-            } else {
-                let trimmed = currentInput.trim();
-                let lastChar = trimmed.slice(-1);
-                if (/[a-zA-Z]/.test(lastChar)) {
-                    currentInput = trimmed + " " + num;
-                } else {
-                    currentInput += num;
-                }
-            }
-        }
-        updateDisplay();
-    }
-
-    function appendInput(val) {
-        isConvActive = false;
-        isCalculatedState = false;
-        currentInput += val;
-        updateDisplay();
-    }
-
-    function appendFractionInput(val) {
-        isConvActive = false;
-        isCalculatedState = false;
-        
-        let current = currentInput.trim();
-        if (current !== "0" && !current.endsWith(" ") && !current.endsWith("/")) {
-            currentInput += " ";
-        }
-        currentInput += val;
-        updateDisplay();
-    }
-
-    function handleOnClear(event) {
-        if (event) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-
-        clearClickCount++;
-
-        if (clearClickCount === 1) {
-            currentInput = "0";
-            currentLabel = "";
-            historyInput = "";
-            isConvActive = false;
-            isCalculatedState = false;
-            awaitingStoreSlot = false;
-            awaitingRecallSlot = false;
-            dimValueMM = null;
-            dimEntryUnit = null;
-            updateDisplay();
-
-            clearTimeout(clearClickTimer);
-            clearClickTimer = setTimeout(() => {
-                clearClickCount = 0;
-            }, 1000);
-        } else if (clearClickCount >= 2) {
-            clearTimeout(clearClickTimer);
-            clearClickCount = 0;
-            clearAll();
-        }
-    }
-
-    function clearAll(event) {
-        if (event) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-        isConvActive = false;
-        historyInput = "";
-        activeMode = "STANDBY";
-        isCalculatedState = false;
-        
-        memoryValues = { Pitch: 0, Rise: 0, Run: 0, Diag: 0, HipV: 0, Length: 0, Width: 0, Height: 0 };
-        jackSpacing = 406;
-        jackList = [];
-        jackIndex = -1;
-        stairData = null;
-        stairStep = 0;
-        hipVState = 0;
-        awaitingStoreSlot = false;
-        awaitingRecallSlot = false;
-        dimValueMM = null;
-        dimEntryUnit = null;
-
-        currentLabel = "O.C.";
-        currentInput = "406 mm";
-        updateDisplay();
-
-        setTimeout(() => {
-            if (currentLabel === "O.C." && currentInput === "406 mm") {
-                currentLabel = "";
-                currentInput = "0";
-                updateDisplay();
-            }
-        }, 1000);
-    }
-
-    function backspace() {
-        isConvActive = false;
-        if (currentInput.length > 1) {
-            currentInput = currentInput.trim().slice(0, -1);
-            if (currentInput === "" || currentInput === "-") currentInput = "0";
-        } else {
-            currentInput = "0";
-        }
-        updateDisplay();
-    }
-
-    function handleDimensionKey(modeName) {
-        isConvActive = false;
-        historyInput = "";
-
-        if (awaitingStoreSlot) {
-            awaitingStoreSlot = false;
-            let valToStore = pendingStoreValue > 0 ? pendingStoreValue : parseValue(currentInput);
-            memoryValues[modeName] = valToStore;
-            activeMode = modeName;
-            currentLabel = modeName;
-            if (modeName === 'Pitch') {
-                currentInput = `${formatVal(memoryValues.Pitch)}°`;
-            } else if (modeName === 'Rise' || modeName === 'Run' || modeName === 'Diag' || modeName === 'Length' || modeName === 'Width' || modeName === 'Height') {
-                currentInput = `${formatVal(memoryValues[modeName])} mm`;
-            } else {
-                currentInput = `${formatVal(memoryValues[modeName])}`;
-            }
-            isCalculatedState = true;
-            updateDisplay();
-            return;
-        }
-
-        if (awaitingRecallSlot) {
-            awaitingRecallSlot = false;
-            activeMode = modeName;
-            currentLabel = modeName;
-            let storedVal = memoryValues[modeName];
-            if (modeName === 'Pitch') {
-                currentInput = `${formatVal(storedVal)}°`;
-            } else if (modeName === 'Rise' || modeName === 'Run' || modeName === 'Diag' || modeName === 'Length' || modeName === 'Width' || modeName === 'Height') {
-                currentInput = `${formatVal(storedVal)} mm`;
-            } else {
-                currentInput = `${formatVal(storedVal)}`;
-            }
-            isCalculatedState = true;
-            updateDisplay();
-            return;
-        }
-
-        let val = parseValue(currentInput);
-        let hasNewInput = (currentInput !== "0" && !currentInput.includes("°") && !currentInput.includes("mm") && !currentInput.includes("ERR") && val > 0);
-
-        if (hasNewInput) {
-            memoryValues[modeName] = val;
-            activeMode = modeName;
-            jackList = [];
-            jackIndex = -1;
-            stairData = null;
-            stairStep = 0;
-            hipVState = 0;
-
-            if (memoryValues.Run > 0 && memoryValues.Pitch > 0) {
-                let angleRad = memoryValues.Pitch * (Math.PI / 180);
-                memoryValues.Rise = memoryValues.Run * Math.tan(angleRad);
-                memoryValues.Diag = Math.sqrt(Math.pow(memoryValues.Rise, 2) + Math.pow(memoryValues.Run, 2));
-            } else if (memoryValues.Run > 0 && memoryValues.Rise > 0) {
-                let angleRad = Math.atan(memoryValues.Rise / memoryValues.Run);
-                memoryValues.Pitch = angleRad * (180 / Math.PI);
-                memoryValues.Diag = Math.sqrt(Math.pow(memoryValues.Rise, 2) + Math.pow(memoryValues.Run, 2));
-            } else if (memoryValues.Diag > 0 && memoryValues.Pitch > 0) {
-                let angleRad = memoryValues.Pitch * (Math.PI / 180);
-                memoryValues.Run = memoryValues.Diag * Math.cos(angleRad);
-                memoryValues.Rise = memoryValues.Diag * Math.sin(angleRad);
-            } else if (memoryValues.Diag > 0 && memoryValues.Rise > 0) {
-                memoryValues.Run = Math.sqrt(Math.max(0, Math.pow(memoryValues.Diag, 2) - Math.pow(memoryValues.Rise, 2)));
-                let angleRad = Math.asin(memoryValues.Rise / memoryValues.Diag);
-                memoryValues.Pitch = angleRad * (180 / Math.PI);
-            } else if (memoryValues.Run > 0 && memoryValues.Diag > 0) {
-                memoryValues.Rise = Math.sqrt(Math.max(0, Math.pow(memoryValues.Diag, 2) - Math.pow(memoryValues.Rise, 2)));
-                let angleRad = Math.acos(memoryValues.Run / memoryValues.Diag);
-                memoryValues.Pitch = angleRad * (180 / Math.PI);
-            } else if (memoryValues.Rise > 0 && memoryValues.Pitch > 0) {
-                let angleRad = memoryValues.Pitch * (Math.PI / 180);
-                memoryValues.Run = memoryValues.Rise / Math.tan(angleRad);
-                memoryValues.Diag = Math.sqrt(Math.pow(memoryValues.Rise, 2) + Math.pow(memoryValues.Run, 2));
-            }
-
-            currentLabel = modeName;
-            if (modeName === 'Pitch') {
-                currentInput = `${formatVal(memoryValues.Pitch)}°`;
-            } else if (modeName === 'Rise' || modeName === 'Run' || modeName === 'Diag' || modeName === 'Length' || modeName === 'Width' || modeName === 'Height') {
-                currentInput = `${formatVal(memoryValues[modeName])} mm`;
-            } else {
-                currentInput = `${formatVal(val)}`;
-            }
-        } else {
-            activeMode = modeName;
-            currentLabel = modeName;
-            let storedVal = memoryValues[modeName];
-            if (modeName === 'Pitch') {
-                currentInput = `${formatVal(storedVal)}°`;
-            } else if (modeName === 'Rise' || modeName === 'Run' || modeName === 'Diag' || modeName === 'Length' || modeName === 'Width' || modeName === 'Height') {
-                currentInput = `${formatVal(storedVal)} mm`;
-            } else {
-                currentInput = `${formatVal(storedVal)}`;
-            }
-        }
-        isCalculatedState = true;
-        updateDisplay();
-    }
-
-    function calcHipV() {
-        isConvActive = false;
-        historyInput = "";
-        if (memoryValues.Rise <= 0 && memoryValues.Run > 0 && memoryValues.Pitch > 0) {
-            let angleRad = memoryValues.Pitch * (Math.PI / 180);
-            memoryValues.Rise = memoryValues.Run * Math.tan(angleRad);
-        }
-
-        if (memoryValues.Run > 0 && memoryValues.Pitch > 0) {
-            let rise = memoryValues.Rise;
-            let run = memoryValues.Run;
-
-            let hipRun = run * Math.SQRT2;
-            let hipPitchRad = Math.atan(rise / hipRun);
-            let hipPitchDeg = hipPitchRad * (180 / Math.PI);
-            let hipLength = Math.sqrt(Math.pow(rise, 2) + Math.pow(hipRun, 2));
-
-            if (activeMode !== 'HipV') {
-                activeMode = 'HipV';
-                hipVState = 0;
-            }
-
-            if (hipVState === 0) {
-                memoryValues.HipV = hipLength;
-                currentLabel = "Hip/V";
-                currentInput = `${formatVal(hipLength)} mm`;
-                hipVState = 1;
-            } else if (hipVState === 1) {
-                let plumbCutVal = hipPitchDeg;
-                currentLabel = "Plumb";
-                currentInput = `${formatVal(plumbCutVal)}°`;
-                hipVState = 2;
-            } else if (hipVState === 2) {
-                let levelCutVal = 90 - hipPitchDeg;
-                currentLabel = "Level";
-                currentInput = `${formatVal(levelCutVal)}°`;
-                hipVState = 0;
-            }
-        } else {
-            currentLabel = "ERR";
-            currentInput = "NEED RUN/PITCH";
-        }
-        isCalculatedState = true;
-        updateDisplay();
-    }
-
-    function calcJack() {
-        isConvActive = false;
-        historyInput = "";
-        if (memoryValues.Run > 0 && memoryValues.Pitch > 0) {
-            if (jackList.length === 0) {
-                let angleRad = memoryValues.Pitch * (Math.PI / 180);
-                let currentRun = memoryValues.Run - jackSpacing;
-                
-                while (currentRun > 0) {
-                    let jackDiag = currentRun / Math.cos(angleRad);
-                    jackList.push(formatVal(jackDiag));
-                    currentRun -= jackSpacing;
-                }
-            }
-
-            if (jackList.length > 0) {
-                jackIndex = (jackIndex + 1) % jackList.length;
-                currentLabel = `Jack ${jackIndex + 1}`;
-                currentInput = `${jackList[jackIndex]} mm`;
-            } else {
-                currentLabel = "";
-                currentInput = "NO JACKS";
-            }
-        } else {
-            currentLabel = "ERR";
-            currentInput = "NEED PITCH";
-        }
-        isCalculatedState = true;
-        updateDisplay();
-    }
-
-    function calcStairAuto(limited) {
-        let rise = memoryValues.Rise > 0 ? memoryValues.Rise : parseValue(currentInput);
-        if (!(rise > 0)) {
-            currentLabel = "ERR";
-            currentInput = "NEED RISE";
-            stairData = null;
-            isCalculatedState = true;
-            updateDisplay();
-            return;
-        }
-        memoryValues.Rise = rise;
-
-        let run = memoryValues.Run > 0 ? memoryValues.Run : 0;
-
-        let risers = limited
-            ? Math.ceil(rise / desiredRiserHeight)
-            : Math.round(rise / desiredRiserHeight);
-        if (risers < 1) risers = 1;
-
-        let actualRiserHeight = rise / risers;
-        let riserDiff = actualRiserHeight - desiredRiserHeight;
-
-        let treads = risers - 1;
-        if (treads < 1) treads = 1;
-
-        let treadWidth, treadDiff, totalRun;
-        if (run > 0) {
-            treadWidth = run / treads;
-            treadDiff = treadWidth - desiredTreadWidth;
-            totalRun = run;
-        } else {
-            treadWidth = desiredTreadWidth;
-            treadDiff = 0;
-            totalRun = treads * treadWidth;
-        }
-
-        let stringerLength = Math.sqrt(Math.pow(rise, 2) + Math.pow(totalRun, 2));
-        let inclineRad = Math.atan(rise / totalRun);
-        let inclineDeg = inclineRad * (180 / Math.PI);
-
-        let openingLength = (stairHeadroom + stairFloorThickness) / Math.tan(inclineRad);
-
-        stairData = {
-            riserHeight: actualRiserHeight,
-            risers: risers,
-            riserDiff: riserDiff,
-            treadWidth: treadWidth,
-            treads: treads,
-            treadDiff: treadDiff,
-            totalRun: totalRun,
-            opening: openingLength,
-            stringerLength: stringerLength,
-            incline: inclineDeg
-        };
-
-        activeMode = "STAIR";
-        stairStep = 0;
-        showStairStep();
-    }
-
-    function showStairStep() {
-        if (!stairData) return;
-        let steps = [
-            { label: "R-HT", value: `${formatVal(stairData.riserHeight)} mm` },
-            { label: "RSRS", value: `${stairData.risers}` },
-            { label: "R+/-", value: `${formatVal(stairData.riserDiff)} mm` },
-            { label: "T-WD", value: `${formatVal(stairData.treadWidth)} mm` },
-            { label: "TRDS", value: `${stairData.treads}` },
-            { label: "T+/-", value: `${formatVal(stairData.treadDiff)} mm` },
-            { label: "OPEN", value: `${formatVal(stairData.opening)} mm` },
-            { label: "STRG", value: `${formatVal(stairData.stringerLength)} mm` },
-            { label: "INCL", value: `${formatVal(stairData.incline)}°` }
-        ];
-        let step = steps[stairStep % steps.length];
-        currentLabel = step.label;
-        currentInput = step.value;
-        stairStep++;
-        isCalculatedState = true;
-        updateDisplay();
-    }
-
-    function handleStairButton() {
-        historyInput = "";
-        if (isConvActive) {
-            isConvActive = false;
-            calcStairAuto(true);
-        } else {
-            if (stairData !== null && activeMode === "STAIR") {
-                showStairStep();
-            } else {
-                calcStairAuto(false);
-            }
-        }
-    }
-
-    function storeVal() {
-        isConvActive = false;
-        historyInput = "";
-        pendingStoreValue = parseValue(currentInput);
-        awaitingStoreSlot = true;
-        awaitingRecallSlot = false;
-        currentLabel = "";
-        currentInput = "STOR?";
-        isCalculatedState = true;
-        updateDisplay();
-    }
-
-    function recallVal() {
-        isConvActive = false;
-        historyInput = "";
-        awaitingRecallSlot = true;
-        awaitingStoreSlot = false;
-        currentLabel = "";
-        currentInput = "RCL?";
-        isCalculatedState = true;
-        updateDisplay();
-    }
-
-    function memPlus() {
-        isConvActive = false;
-        historyInput = "";
-        memory += parseValue(currentInput);
-        currentLabel = "M+";
-        currentInput = `${formatVal(memory)}`;
-        isCalculatedState = true;
-        updateDisplay();
-    }
-
-    function calcSquare() {
-        isConvActive = false;
-        historyInput = "";
-        let val = parseValue(currentInput);
-        currentLabel = "x²";
-        currentInput = formatVal(val * val);
-        isCalculatedState = true;
-        updateDisplay();
-    }
-
-    function parseInchesExpression(str) {
-        if (!str) return 0;
-        let s = str.trim();
-        s = s.replace(/inch|in/gi, '').trim();
-        s = s.replace(/\s+/g, ' ').trim();
-        s = s.replace(/(\d+)\s+(\d+)\s*\/\s*(\d+)/g, "($1 + $2/$3)");
-        s = s.replace(/(\d+)\s*\/\s*(\d+)/g, "($1/$2)");
-        s = s.replace(/[^0-9+\-*/().\s]/g, '');
-        if (!s) return 0;
-        try {
-            return Function('"use strict";return (' + s + ')')();
-        } catch(e) {
-            return 0;
-        }
-    }
-
-    function calculateResult() {
-        isConvActive = false;
-        try {
-            let cleanStr = currentInput.trim();
-            let isArithmetic = /[+\-*/]/.test(cleanStr);
-
-            if (isArithmetic) {
-                historyInput = cleanStr + " =";
-            } else {
-                historyInput = "";
-            }
-
-            let hasInch = /inch|in/gi.test(cleanStr) || cleanStr.includes("/");
-
-            let resultInches = 0;
-
-            if (isArithmetic && hasInch) {
-                let tokens = cleanStr.split(/(\s[+\-*/]\s)/);
-                let currentVal = 0;
-                let currentOp = '+';
-                let isFirstTerm = true;
-
-                for (let i = 0; i < tokens.length; i++) {
-                    let rawToken = tokens[i];
-                    if (rawToken === undefined) continue;
-                    let token = rawToken.trim();
-                    if (!token) continue;
-
-                    if (/^[+\-*/]$/.test(token)) {
-                        currentOp = token;
-                    } else {
-                        let parsedInch = parseInchesExpression(token);
-                        if (isFirstTerm) {
-                            currentVal = parsedInch;
-                            isFirstTerm = false;
-                        } else {
-                            if (currentOp === '+') currentVal += parsedInch;
-                            else if (currentOp === '-') currentVal -= parsedInch;
-                            else if (currentOp === '*') currentVal *= parsedInch;
-                            else if (currentOp === '/') currentVal /= parsedInch;
-                        }
-                    }
-                }
-                resultInches = currentVal;
-            } else if (hasInch) {
-                resultInches = parseInchesExpression(cleanStr);
-            } else {
-                let parsable = cleanStr.replace(/[^0-9+\-*/().\s]/g, '');
-                let res = Function('"use strict";return (' + parsable + ')')();
-                currentLabel = "";
-                if (!Number.isFinite(res)) {
-                    currentInput = "Error";
-                } else {
-                    currentInput = formatVal(res);
-                }
-                isCalculatedState = true;
-                updateDisplay();
-                return;
-            }
-
-            currentLabel = "";
-            if (!Number.isFinite(resultInches)) {
-                currentInput = "Error";
-            } else {
-                currentInput = formatInchToStacked(resultInches);
-            }
-        } catch(e) {
-            currentLabel = "";
-            currentInput = "Error";
-        }
-        isCalculatedState = true;
-        updateDisplay();
-    }
-
-    // 터치 지연(300ms 딜레이) 없이 빠르게 타닥 입력되도록 개선하는 스크립트
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('button').forEach(btn => {
-            btn.addEventListener('touchstart', (e) => {
-                e.preventDefault(); 
-                btn.click();        
-            }, { passive: false });
+function switchTab(evt, tabId) {
+    const contents = document.getElementsByClassName('tab-content');
+    for (let c of contents) c.classList.remove('active');
+    const buttons = document.getElementsByClassName('tab-btn');
+    for (let b of buttons) b.classList.remove('active');
+    document.getElementById(tabId).classList.add('active');
+    evt.currentTarget.classList.add('active');
+}
+
+// 실시간 연동을 위한 이벤트 리스너 세팅
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. 서까래 탭 입력요소 감지
+    const rafterInputs = document.querySelectorAll('#tab-rafter input, #tab-rafter select');
+    rafterInputs.forEach(el => {
+        el.addEventListener('input', () => {
+            toggleCustomSheathing1();
+            toggleCustomRidge1();
+            calculateRafter();
+        });
+        el.addEventListener('change', () => {
+            toggleCustomSheathing1();
+            toggleCustomRidge1();
+            calculateRafter();
         });
     });
+
+    // 2. 힙·잭서까래 탭 입력요소 감지
+    const hipJackInputs = document.querySelectorAll('#tab-hipjack input, #tab-hipjack select');
+    hipJackInputs.forEach(el => {
+        el.addEventListener('input', () => {
+            toggleCustomSheathing2();
+            toggleCustomSpacing();
+            calculateHipJack();
+        });
+        el.addEventListener('change', () => {
+            toggleCustomSheathing2();
+            toggleCustomSpacing();
+            calculateHipJack();
+        });
+    });
+
+    // 3. 목조계산기 탭 및 박공 스터드 입력요소 감지
+    const gableInputs = document.querySelectorAll('#tab-reverse input, #tab-reverse select');
+    gableInputs.forEach(el => {
+        if (el.id !== 'calcRun' && el.id !== 'calcRise' && el.id !== 'calcAngle') {
+            el.addEventListener('input', () => {
+                toggleGableSpacing();
+                runGableCalc();
+            });
+            el.addEventListener('change', () => {
+                toggleGableSpacing();
+                runGableCalc();
+            });
+        }
+    });
+
+    // 초기 실행
+    calculateRafter();
+    calculateHipJack();
+    toggleGableSpacing();
+    runGableCalc();
+});
+
+function toggleCustomSheathing1() {
+    const v = document.getElementById('wallSheathing1').value;
+    document.getElementById('customSheathingInput1').style.display = (v === 'custom') ? 'block' : 'none';
+}
+function toggleCustomRidge1() {
+    const v = document.getElementById('ridgeSize1').value;
+    document.getElementById('customRidgeInput1').style.display = (v === 'custom') ? 'block' : 'none';
+}
+
+function toggleCustomSheathing2() {
+    const v = document.getElementById('wallSheathing2').value;
+    document.getElementById('customSheathingInput2').style.display = (v === 'custom') ? 'block' : 'none';
+}
+function toggleCustomSpacing() {
+    const v = document.getElementById('rafterSpacing').value;
+    document.getElementById('customSpacingInput').style.display = (v === 'custom') ? 'block' : 'none';
+}
+
+function toggleGableSpacing() {
+    const v = document.getElementById('gableSpacing').value;
+    document.getElementById('customGableSpacing').style.display = (v === 'custom') ? 'block' : 'none';
+}
+
+
+// =========================================================================
+// [A] 서까래 계산 로직 함수 (시작)
+// =========================================================================
+function calculateRafter() {
+    const halfSpanMm = parseFloat(document.getElementById('halfSpanInput1').value) || 0;
+    const rafterDepth = parseFloat(document.getElementById('rafterSize1').value) || 235;
+    
+    const ridgeSelect = document.getElementById('ridgeSize1').value;
+    let ridgeDepth = (ridgeSelect === 'custom') ? (parseFloat(document.getElementById('customRidgeInput1').value) || 0) : (parseFloat(ridgeSelect) || 235);
+
+    const wallThickness = parseFloat(document.getElementById('wallType1').value) || 0;
+    
+    const sheathingSelect = document.getElementById('wallSheathing1').value;
+    let wallSheathingMm = (sheathingSelect === 'custom') ? (parseFloat(document.getElementById('customSheathingInput1').value) || 0) : (parseFloat(sheathingSelect) || 0);
+
+    const overhangMm = parseFloat(document.getElementById('overhang1').value) || 0;
+    const subFasciaMm = parseFloat(document.getElementById('subFascia1').value) || 0;
+    
+    const angleInputVal = document.getElementById('roofAngle1').value;
+    const pitchInputVal = document.getElementById('pitchRise1').value;
+
+    let multiplier = 0, riseRatio = 0;
+    
+    if (document.activeElement.id === 'roofAngle1' && angleInputVal !== '') {
+        document.getElementById('pitchRise1').value = '';
+        const rad = parseFloat(angleInputVal) * (Math.PI / 180);
+        multiplier = 1 / Math.cos(rad);
+        riseRatio = Math.tan(rad);
+    } else if (document.activeElement.id === 'pitchRise1' && pitchInputVal !== '') {
+        document.getElementById('roofAngle1').value = '';
+        const pRise = parseFloat(pitchInputVal);
+        multiplier = Math.sqrt(Math.pow(10, 2) + Math.pow(pRise, 2)) / 10;
+        riseRatio = pRise / 10;
+    } else {
+        if (pitchInputVal !== '') {
+            const pRise = parseFloat(pitchInputVal);
+            multiplier = Math.sqrt(Math.pow(10, 2) + Math.pow(pRise, 2)) / 10;
+            riseRatio = pRise / 10;
+        } else if (angleInputVal !== '') {
+            const rad = parseFloat(angleInputVal) * (Math.PI / 180);
+            multiplier = 1 / Math.cos(rad);
+            riseRatio = Math.tan(rad);
+        } else {
+            return;
+        }
+    }
+
+    const ridgeThicknessHalf = 19;
+    const actualRun = halfSpanMm + (wallThickness / 2) + wallSheathingMm - ridgeThicknessHalf;
+    const actualRise = actualRun * riseRatio;
+
+    const overhangRun = overhangMm - subFasciaMm - (wallThickness / 2) - wallSheathingMm;
+    const overhangRise = overhangRun * riseRatio;
+
+    const mainRafterLen = actualRun * multiplier;
+    const overhangRafterLen = overhangRun * multiplier;
+    const totalRafterLen = mainRafterLen + overhangRafterLen;
+
+    const seatCutVal = wallThickness + wallSheathingMm;
+    const plumbCutVal = seatCutVal * riseRatio;
+    const hapVal = (rafterDepth * multiplier) - plumbCutVal;
+    const totalRiseVal = actualRise + hapVal;
+    const tempPostHeight = totalRiseVal - ridgeDepth;
+
+    document.getElementById('res-main').innerHTML = `<b>본 서까래 길이: ${mainRafterLen.toFixed(1)} mm</b>`;
+    document.getElementById('res-overhang').innerHTML = `<b>처마 서까래 길이: ${overhangRafterLen.toFixed(1)} mm</b>`;
+    document.getElementById('res-cuts').innerHTML = `<b>HAP : ${hapVal.toFixed(1)}</b> / 시트컷(Seat) : ${seatCutVal.toFixed(1)} / 플럼컷(Plumb) : ${plumbCutVal.toFixed(1)}`;
+    document.getElementById('res-temp-post').innerHTML = `<b>임시기둥 높이 : ${tempPostHeight.toFixed(1)} mm</b>`;
+    document.getElementById('res-total').innerHTML = `서까래 총 길이: ${totalRafterLen.toFixed(1)} mm`;
+}
+// [A] 서까래 계산 로직 함수 (끝)
+// =========================================================================
+
+
+// =========================================================================
+// [B] 힙·잭서까래 계산 로직 함수 (시작)
+// =========================================================================
+function calculateHipJack() {
+    const halfSpanMm = parseFloat(document.getElementById('halfSpanInput2').value) || 0;
+    const overhangMm = parseFloat(document.getElementById('overhang2').value) || 0;
+    const wallThickness = parseFloat(document.getElementById('wallType2').value) || 0;
+    
+    const sheathingSelect = document.getElementById('wallSheathing2').value;
+    let wallSheathingMm = (sheathingSelect === 'custom') ? (parseFloat(document.getElementById('customSheathingInput2').value) || 0) : (parseFloat(sheathingSelect) || 0);
+
+    const subFasciaMm = parseFloat(document.getElementById('subFascia2').value) || 0;
+    
+    const angleInputVal = document.getElementById('roofAngle2').value;
+    const pitchInputVal = document.getElementById('pitchRise2').value;
+
+    let multiplier = 0, riseRatio = 0;
+    if (document.activeElement.id === 'roofAngle2' && angleInputVal !== '') {
+        document.getElementById('pitchRise2').value = '';
+        const rad = parseFloat(angleInputVal) * (Math.PI / 180);
+        multiplier = 1 / Math.cos(rad);
+        riseRatio = Math.tan(rad);
+    } else if (document.activeElement.id === 'pitchRise2' && pitchInputVal !== '') {
+        document.getElementById('roofAngle2').value = '';
+        const pRise = parseFloat(pitchInputVal);
+        multiplier = Math.sqrt(Math.pow(10, 2) + Math.pow(pRise, 2)) / 10;
+        riseRatio = pRise / 10;
+    } else {
+        if (pitchInputVal !== '') {
+            const pRise = parseFloat(pitchInputVal);
+            multiplier = Math.sqrt(Math.pow(10, 2) + Math.pow(pRise, 2)) / 10;
+            riseRatio = pRise / 10;
+        } else if (angleInputVal !== '') {
+            const rad = parseFloat(angleInputVal) * (Math.PI / 180);
+            multiplier = 1 / Math.cos(rad);
+            riseRatio = Math.tan(rad);
+        } else {
+            return;
+        }
+    }
+
+    const ridgeThicknessHalf = 19;
+    const actualRun = halfSpanMm + (wallThickness / 2) + wallSheathingMm - ridgeThicknessHalf;
+    const actualRise = actualRun * riseRatio;
+
+    const overhangRun = overhangMm - subFasciaMm - (wallThickness / 2) - wallSheathingMm;
+    const overhangRise = overhangRun * riseRatio;
+
+    const mainRafterLen = actualRun * multiplier;
+    const mainHipLen = Math.sqrt(2 * Math.pow(actualRun, 2) + Math.pow(actualRise, 2));
+    const overhangHipLen = Math.sqrt(2 * Math.pow(overhangRun, 2) + Math.pow(overhangRise, 2));
+    const hipRafterLen = mainHipLen + overhangHipLen;
+
+    const spacingSelect = document.getElementById('rafterSpacing').value;
+    let spacingMm = 406;
+    if (spacingSelect === 'custom') {
+        spacingMm = parseFloat(document.getElementById('customSpacingInput').value) || 406;
+    } else {
+        spacingMm = parseFloat(spacingSelect) || 406;
+    }
+
+    const commonDiff = spacingMm * multiplier;
+
+    document.getElementById('res-hip').innerHTML = `<b>힙 서까래 총 길이: ${hipRafterLen.toFixed(1)} mm</b>`;
+    document.getElementById('res-diff').innerHTML = `<b>잭 서까래 길이 감소치: ${commonDiff.toFixed(1)} mm</b>`;
+
+    const count = parseInt(document.getElementById('jackCount').value) || 4;
+    let longestJackLen = mainRafterLen - commonDiff;
+    if (longestJackLen < 0) longestJackLen = 0;
+
+    let jackHtml = `<b>[가장 긴 잭 서까래 및 순차적 길이 (${count}개)]</b><br>`;
+    jackHtml += `🔥 <span style="color: #c0392b;">1번 잭 서까래:</span> <b>${longestJackLen.toFixed(1)} mm</b><br>`;
+    
+    for (let i = 1; i <= count; i++) {
+        let currentJack = longestJackLen - ((i - 1) * commonDiff);
+        if (currentJack < 0) currentJack = 0;
+        jackHtml += `&nbsp;&nbsp;• ${i}번 잭 서까래: <b>${currentJack.toFixed(1)} mm</b><br>`;
+    }
+    document.getElementById('res-jack-list').innerHTML = jackHtml;
+}
+// [B] 힙·잭서까래 계산 로직 함수 (끝)
+// =========================================================================
+
+
+// =========================================================================
+// [C] 목조계산기(역산 + 디아그) 로직 함수 (시작)
+// =========================================================================
+function runReverseCalc() {
+    const runVal = document.getElementById('calcRun').value.trim();
+    const riseVal = document.getElementById('calcRise').value.trim();
+    const angleVal = document.getElementById('calcAngle').value.trim();
+
+    const hasRun = runVal !== '' && !isNaN(parseFloat(runVal));
+    const hasRise = riseVal !== '' && !isNaN(parseFloat(riseVal));
+    const hasAngle = angleVal !== '' && !isNaN(parseFloat(angleVal));
+
+    const resultBox = document.getElementById('reverseResultBox');
+    const outputEl = document.getElementById('res-reverse-output');
+
+    if (hasRun && hasRise && !hasAngle) {
+        const run = parseFloat(runVal);
+        const rise = parseFloat(riseVal);
+        const deg = (Math.atan(rise / run) * (180 / Math.PI)).toFixed(2);
+        const diag = Math.sqrt(Math.pow(run, 2) + Math.pow(rise, 2)).toFixed(1);
+        
+        outputEl.innerHTML = `경사 각도: <b>${deg}°</b><br>디아그 (Diag): <b>${diag} mm</b>`;
+        resultBox.style.display = 'block';
+    } else if (hasRun && hasAngle && !hasRise) {
+        const run = parseFloat(runVal);
+        const deg = parseFloat(angleVal);
+        const rad = deg * (Math.PI / 180);
+        const rise = (run * Math.tan(rad)).toFixed(1);
+        const diag = (run / Math.cos(rad)).toFixed(1);
+
+        outputEl.innerHTML = `Rise (높이): <b>${rise} mm</b><br>디아그 (Diag): <b>${diag} mm</b>`;
+        resultBox.style.display = 'block';
+    } else if (hasRise && hasAngle && !hasRun) {
+        const rise = parseFloat(riseVal);
+        const deg = parseFloat(angleVal);
+        const rad = deg * (Math.PI / 180);
+        const run = (rise / Math.tan(rad)).toFixed(1);
+        const diag = (rise / Math.sin(rad)).toFixed(1);
+
+        outputEl.innerHTML = `Run (밑변): <b>${run} mm</b><br>디아그 (Diag): <b>${diag} mm</b>`;
+        resultBox.style.display = 'block';
+    } else {
+        alert('계산할 두 개의 값만 입력하고, 나머지 빈 칸 하나는 비워둔 채 [=] 버튼을 눌러주세요.');
+    }
+}
+
+function resetCalc() {
+    document.getElementById('calcRun').value = '';
+    document.getElementById('calcRise').value = '';
+    document.getElementById('calcAngle').value = '';
+    document.getElementById('reverseResultBox').style.display = 'none';
+}
+// [C] 목조계산기(역산 + 디아그) 로직 함수 (끝)
+// =========================================================================
+
+
+// =========================================================================
+// [D] 박공 스터드 계산 로직 함수 (시작)
+// =========================================================================
+function runGableCalc() {
+    const runVal = parseFloat(document.getElementById('gableRun').value) || 0;
+    const angleVal = parseFloat(document.getElementById('gableAngle').value) || 0;
+    
+    const spacingSelect = document.getElementById('gableSpacing').value;
+    let spacingMm = 406;
+    if (spacingSelect === 'custom') {
+        spacingMm = parseFloat(document.getElementById('customGableSpacing').value) || 406;
+    } else {
+        spacingMm = parseFloat(spacingSelect) || 406;
+    }
+
+    const resultBox = document.getElementById('gableResultBox');
+    const diffEl = document.getElementById('res-gable-diff');
+    const listEl = document.getElementById('res-gable-list');
+
+    if (runVal <= 0 || angleVal <= 0 || spacingMm <= 0) {
+        resultBox.style.display = 'block';
+        diffEl.style.display = 'none';
+        listEl.innerHTML = '올바른 밑변, 각도, 간격 값을 입력해주세요.';
+        return;
+    }
+
+    const rad = angleVal * (Math.PI / 180);
+    const riseRatio = Math.tan(rad);
+    
+    const centerPeakHeight = runVal * riseRatio;
+    const commonDiff = spacingMm * riseRatio;
+
+    diffEl.style.display = 'block';
+    diffEl.innerHTML = `<b>스터드 길이 감소치 (Common Diff): ${commonDiff.toFixed(1)} mm</b>`;
+
+    let gableHtml = `<b>[가장 긴 센터 스터드 및 순차적 길이]</b><br>`;
+    gableHtml += `🔥 <span style="color: #c0392b;">1순위 (정중앙 킹스터드):</span> <b>${centerPeakHeight.toFixed(1)} mm</b> <span style="font-size: 0.8rem; color: #666;">(상단 수평 절단)</span><br>`;
+
+    let currentDist = spacingMm;
+    let rank = 2;
+    while (currentDist < runVal && rank <= 12) {
+        let currentHeight = centerPeakHeight - (currentDist * riseRatio);
+        if (currentHeight < 0) currentHeight = 0;
+        
+        gableHtml += `&nbsp;&nbsp;• ${rank}순위 스터드: <b>${currentHeight.toFixed(1)} mm</b> <span style="font-size: 0.8rem; color: #666;">(사선 플럼컷)</span><br>`;
+        
+        currentDist += spacingMm;
+        rank++;
+    }
+
+    listEl.innerHTML = gableHtml;
+    resultBox.style.display = 'block';
+}
+// [D] 박공 스터드 계산 로직 함수 (끝)
+// =========================================================================
 </script>
 
 </body>
