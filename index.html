@@ -309,7 +309,7 @@
                     </div>
                 </div>
                 <div class="input-box" style="flex: 0.8;">
-                    <label for="overhang1">오버행</label>
+                    <label for="overhang1">처마 길이</label>
                     <div class="input-with-unit">
                         <input type="number" id="overhang1" value="500">
                         <span class="unit-text">mm</span>
@@ -405,14 +405,14 @@
         <div class="input-group">
             <div class="triple-inputs">
                 <div class="input-box">
-                    <label for="halfSpanInput2">Half Span</label>
+                    <label for="halfSpanInput2">Half Span (외벽 중심)</label>
                     <div class="input-with-unit">
                         <input type="number" id="halfSpanInput2" value="4000">
                         <span class="unit-text">mm</span>
                     </div>
                 </div>
                 <div class="input-box">
-                    <label for="overhang2">오버행</label>
+                    <label for="overhang2">처마 길이</label>
                     <div class="input-with-unit">
                         <input type="number" id="overhang2" value="500">
                         <span class="unit-text">mm</span>
@@ -688,8 +688,7 @@ function calculateHipJack() {
     if (longestJackLen < 0) longestJackLen = 0;
 
     let jackHtml = `<b>[가장 긴 잭 서까래 및 순차적 길이 (${count}개)]</b><br>`;
-    jackHtml += `🔥 <span style="color: #c0392b;">1번 잭 서까래:</span> <b>${longestJackLen.toFixed(1)} mm</b><br>`;
-    
+
     for (let i = 1; i <= count; i++) {
         let currentJack = longestJackLen - ((i - 1) * commonDiff);
         if (currentJack < 0) currentJack = 0;
