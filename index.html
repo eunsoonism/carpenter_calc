@@ -309,7 +309,7 @@
                     </div>
                 </div>
                 <div class="input-box" style="flex: 0.8;">
-                    <label for="overhang1">처마 길이</label>
+                    <label for="overhang1">오버행</label>
                     <div class="input-with-unit">
                         <input type="number" id="overhang1" value="500">
                         <span class="unit-text">mm</span>
@@ -403,44 +403,20 @@
     <!-- ===================================================================== -->
     <div id="tab-hipjack" class="tab-content">
         <div class="input-group">
-            <div class="dual-inputs">
-                <div class="input-box" style="flex: 1.2;">
+            <div class="triple-inputs">
+                <div class="input-box">
                     <label for="halfSpanInput2">Half Span (외벽 중심)</label>
                     <div class="input-with-unit">
                         <input type="number" id="halfSpanInput2" value="4000">
                         <span class="unit-text">mm</span>
                     </div>
                 </div>
-                <div class="input-box" style="flex: 0.8;">
-                    <label for="overhang2">처마 길이</label>
+                <div class="input-box">
+                    <label for="overhang2">오버행</label>
                     <div class="input-with-unit">
                         <input type="number" id="overhang2" value="500">
                         <span class="unit-text">mm</span>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="input-group">
-            <div class="triple-inputs">
-                <div class="input-box">
-                    <label for="wallType2">외벽 스터드</label>
-                    <select id="wallType2">
-                        <option value="89">2x4 (89)</option>
-                        <option value="140" selected>2x6 (140)</option>
-                        <option value="184">2x8 (184)</option>
-                        <option value="0">직접 입력</option>
-                    </select>
-                </div>
-                <div class="input-box">
-                    <label for="wallSheathing2">외벽 합판 두께</label>
-                    <select id="wallSheathing2">
-                        <option value="9.5">9.5</option>
-                        <option value="11.1" selected>11.1 (기본)</option>
-                        <option value="12">12.0</option>
-                        <option value="custom">직접 입력</option>
-                    </select>
-                    <input type="number" step="0.5" id="customSheathingInput2" class="custom-input-box" placeholder="두께">
                 </div>
                 <div class="input-box">
                     <label for="subFascia2">서브페이샤</label>
@@ -525,12 +501,10 @@ document.addEventListener("DOMContentLoaded", function() {
     const hipJackInputs = document.querySelectorAll('#tab-hipjack input, #tab-hipjack select');
     hipJackInputs.forEach(el => {
         el.addEventListener('input', () => {
-            toggleCustomSheathing2();
             toggleCustomSpacing();
             calculateHipJack();
         });
         el.addEventListener('change', () => {
-            toggleCustomSheathing2();
             toggleCustomSpacing();
             calculateHipJack();
         });
@@ -567,10 +541,6 @@ function toggleCustomRidge1() {
     document.getElementById('customRidgeInput1').style.display = (v === 'custom') ? 'block' : 'none';
 }
 
-function toggleCustomSheathing2() {
-    const v = document.getElementById('wallSheathing2').value;
-    document.getElementById('customSheathingInput2').style.display = (v === 'custom') ? 'block' : 'none';
-}
 function toggleCustomSpacing() {
     const v = document.getElementById('rafterSpacing').value;
     document.getElementById('customSpacingInput').style.display = (v === 'custom') ? 'block' : 'none';
@@ -662,11 +632,6 @@ function calculateRafter() {
 function calculateHipJack() {
     const halfSpanMm = parseFloat(document.getElementById('halfSpanInput2').value) || 0;
     const overhangMm = parseFloat(document.getElementById('overhang2').value) || 0;
-    const wallThickness = parseFloat(document.getElementById('wallType2').value) || 0;
-    
-    const sheathingSelect = document.getElementById('wallSheathing2').value;
-    let wallSheathingMm = (sheathingSelect === 'custom') ? (parseFloat(document.getElementById('customSheathingInput2').value) || 0) : (parseFloat(sheathingSelect) || 0);
-
     const subFasciaMm = parseFloat(document.getElementById('subFascia2').value) || 0;
     
     const angleInputVal = document.getElementById('roofAngle2').value;
@@ -697,17 +662,13 @@ function calculateHipJack() {
         }
     }
 
+    // 힙/잭서까래는 본채·처마를 나누지 않고, 용마루~처마 끝까지를 하나의 run으로 계산합니다.
     const ridgeThicknessHalf = 19;
-    const actualRun = halfSpanMm + (wallThickness / 2) + wallSheathingMm - ridgeThicknessHalf;
-    const actualRise = actualRun * riseRatio;
+    const totalRun = halfSpanMm + overhangMm - subFasciaMm - ridgeThicknessHalf;
+    const totalRise = totalRun * riseRatio;
 
-    const overhangRun = overhangMm - subFasciaMm - (wallThickness / 2) - wallSheathingMm;
-    const overhangRise = overhangRun * riseRatio;
-
-    const mainRafterLen = actualRun * multiplier;
-    const mainHipLen = Math.sqrt(2 * Math.pow(actualRun, 2) + Math.pow(actualRise, 2));
-    const overhangHipLen = Math.sqrt(2 * Math.pow(overhangRun, 2) + Math.pow(overhangRise, 2));
-    const hipRafterLen = mainHipLen + overhangHipLen;
+    const mainRafterLen = totalRun * multiplier; // 잭서까래 기준 길이 (처마 포함)
+    const hipRafterLen = Math.sqrt(2 * Math.pow(totalRun, 2) + Math.pow(totalRise, 2)); // 힙 총 길이 (처마 포함)
 
     const spacingSelect = document.getElementById('rafterSpacing').value;
     let spacingMm = 406;
@@ -719,7 +680,7 @@ function calculateHipJack() {
 
     const commonDiff = spacingMm * multiplier;
 
-    document.getElementById('res-hip').innerHTML = `<b>힙 서까래 총 길이: ${hipRafterLen.toFixed(1)} mm</b>`;
+    document.getElementById('res-hip').innerHTML = `<b>힙 서까래 총 길이: ${hipRafterLen.toFixed(1)} mm</b> <span style="font-size:0.82rem; color:#666;">(run: ${totalRun.toFixed(1)} / rise: ${totalRise.toFixed(1)})</span>`;
     document.getElementById('res-diff').innerHTML = `<b>잭 서까래 길이 감소치: ${commonDiff.toFixed(1)} mm</b>`;
 
     const count = parseInt(document.getElementById('jackCount').value) || 4;
