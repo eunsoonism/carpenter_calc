@@ -680,7 +680,7 @@ function calculateHipJack() {
 
     const commonDiff = spacingMm * multiplier;
 
-    document.getElementById('res-hip').innerHTML = `<b>힙 서까래 총 길이: ${hipRafterLen.toFixed(1)} mm</b> <span style="font-size:0.82rem; color:#666;">(run: ${totalRun.toFixed(1)} / rise: ${totalRise.toFixed(1)})</span>`;
+    document.getElementById('res-hip').innerHTML = `<b>힙 서까래 총 길이: ${hipRafterLen.toFixed(1)} mm</b> <br><span style="font-size:0.82rem; color:#666;">(run: ${totalRun.toFixed(1)} / rise: ${totalRise.toFixed(1)})</span>`;
     document.getElementById('res-diff').innerHTML = `<b>잭 서까래 길이 감소치: ${commonDiff.toFixed(1)} mm</b>`;
 
     const count = parseInt(document.getElementById('jackCount').value) || 4;
